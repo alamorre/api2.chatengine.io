@@ -25,7 +25,7 @@ class LoginTestCase(APITestCase):
             content_type='application/json'
         )
         response = view(request)
-
+        
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.data['token'], None)
         self.assertEqual(response.data['user']['email'], user_email_1)
@@ -43,6 +43,7 @@ class LoginTestCase(APITestCase):
         response = view(request)
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['non_field_errors'][0], "Unable to log in with provided credentials.")
 
     def test_login_bad_password(self):
         factory = APIRequestFactory()
@@ -56,3 +57,4 @@ class LoginTestCase(APITestCase):
         response = view(request)
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['non_field_errors'][0], "Unable to log in with provided credentials.")

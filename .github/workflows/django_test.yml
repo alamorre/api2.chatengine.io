@@ -1,4 +1,4 @@
-name: Django Channels CI
+name: Django CI Tests
 
 on:
   pull_request:
@@ -33,9 +33,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      # - name: Check Secrets
-      #   run: |
-      #     echo ${{ secrets.SUPPORT_USER_NAME }}
       - name: Start Redis
         uses: supercharge/redis-github-action@1.2.0
         with:

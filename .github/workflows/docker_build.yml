@@ -1,0 +1,21 @@
+name: Build Docker Image
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop # Include any branches you want PRs to trigger this action
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: |
+          docker build . -t api2.chatengine.io:latest
+          # TODO: run your container to verify it works
+          # docker run --rm myapp:latest

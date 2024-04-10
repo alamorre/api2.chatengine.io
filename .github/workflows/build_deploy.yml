@@ -1,4 +1,4 @@
-name: Build and Deploy to AWS
+name: AWS Build & Deploy
 
 on:
   workflow_dispatch:

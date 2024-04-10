@@ -12,3 +12,8 @@ db.sqlite3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+# Terraform
+.terraform/
+main.tf
+terraform/

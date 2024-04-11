@@ -9,5 +9,6 @@ db.sqlite3
 
 # Terraform state
 .terraform/*
+terraform/.terraform/*
 .terraform.*
 terraform.*

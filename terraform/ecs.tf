@@ -1,5 +1,5 @@
 resource "aws_security_group" "ecs_sg" {
-  name        = "ecs-sg"
+  name        = "ce-ecs-sg"
   description = "Security group for ECS cluster"
   vpc_id      = aws_vpc.main.id
 
@@ -20,9 +20,33 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
+# IAM role for ECS task execution
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "ce_ecs_task_execution_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        },
+        Effect = "Allow",
+      },
+    ],
+  })
+}
+
+# Attach the Amazon ECS task execution policy to the role
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 # Creating an ECS cluster
 resource "aws_ecs_cluster" "cluster" {
-  name = "cluster"
+  name = "ce-http-cluster"
 
   setting {
     name  = "containerInsights"
@@ -37,11 +61,12 @@ resource "aws_ecs_task_definition" "task" {
   requires_compatibilities = ["FARGATE", "EC2"]
   cpu                      = 512
   memory                   = 2048
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
     {
-      name : "nginx",
-      image : "nginx:1.23.1",
+      name : "apichatengine",
+      image : "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest",
       cpu : 512,
       memory : 2048,
       essential : true,
@@ -57,7 +82,7 @@ resource "aws_ecs_task_definition" "task" {
 
 # Creating an ECS service
 resource "aws_ecs_service" "service" {
-  name             = "service"
+  name             = "ce-http-service"
   cluster          = aws_ecs_cluster.cluster.id
   task_definition  = aws_ecs_task_definition.task.arn
   desired_count    = 1
@@ -67,7 +92,7 @@ resource "aws_ecs_service" "service" {
   network_configuration {
     assign_public_ip = true
     security_groups  = [aws_security_group.ecs_sg.id]
-    subnets          = [aws_subnet.public_subnet.id]
+    subnets          = [aws_subnet.subnet_1.id, aws_subnet.subnet_2.id]
   }
 
   lifecycle {

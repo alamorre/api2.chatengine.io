@@ -18,7 +18,15 @@ from django.urls import include, re_path
 from django.contrib import admin
 from django.urls import path
 
+from django.http import HttpResponse
+
+def health_check(request):
+    return HttpResponse("OK")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^accounts/', include('accounts.urls', namespace='accounts')),
+
+    # Add the health check URL
+    path('health/', health_check, name='health_check'),
 ]

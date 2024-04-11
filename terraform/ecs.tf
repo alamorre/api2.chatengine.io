@@ -98,4 +98,14 @@ resource "aws_ecs_service" "service" {
   lifecycle {
     ignore_changes = [task_definition]
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app_tg.arn
+    container_name   = "apichatengine"
+    container_port   = 80
+  }
+
+  depends_on = [
+    aws_lb_listener.https_listener,
+  ]
 }

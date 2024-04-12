@@ -27,7 +27,7 @@ resource "aws_lb" "app_lb" {
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = [aws_subnet.subnet_1.id, aws_subnet.subnet_2.id]
 
-  enable_deletion_protection = false
+  enable_deletion_protection = false # TODO: Set to true for production
 }
 
 resource "aws_lb_target_group" "app_tg" {
@@ -52,7 +52,7 @@ resource "aws_lb_listener" "https_listener" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+  certificate_arn   = aws_acm_certificate.cert.arn
 
   default_action {
     type             = "forward"

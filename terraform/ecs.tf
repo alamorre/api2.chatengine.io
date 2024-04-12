@@ -82,12 +82,14 @@ resource "aws_ecs_task_definition" "task" {
 
 # Creating an ECS service
 resource "aws_ecs_service" "service" {
-  name             = "ce-http-service"
-  cluster          = aws_ecs_cluster.cluster.id
-  task_definition  = aws_ecs_task_definition.task.arn
-  desired_count    = 1
-  launch_type      = "FARGATE"
-  platform_version = "LATEST"
+  name                 = "ce-http-service"
+  cluster              = aws_ecs_cluster.cluster.id
+  task_definition      = aws_ecs_task_definition.task.arn
+  desired_count        = 1
+  launch_type          = "FARGATE"
+  platform_version     = "LATEST"
+  force_new_deployment = true # Forces a new deployment with each apply
+
 
   network_configuration {
     assign_public_ip = true
@@ -100,7 +102,7 @@ resource "aws_ecs_service" "service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.app_tg.arn
+    target_group_arn = aws_lb_target_group.default.arn
     container_name   = "apichatengine"
     container_port   = 80
   }

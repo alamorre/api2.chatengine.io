@@ -59,16 +59,16 @@ resource "aws_ecs_task_definition" "task" {
   family                   = "service"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE", "EC2"]
-  cpu                      = 512
-  memory                   = 2048
+  cpu                      = 256 # Match container_definitions
+  memory                   = 512 # Match container_definitions
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
     {
       name : "apichatengine",
       image : "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest",
-      cpu : 512,
-      memory : 2048,
+      cpu : 256,
+      memory : 512,
       essential : true,
       portMappings : [
         {
@@ -102,7 +102,7 @@ resource "aws_ecs_service" "service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.default.arn
+    target_group_arn = aws_lb_target_group.app_tg.arn
     container_name   = "apichatengine"
     container_port   = 80
   }

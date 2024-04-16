@@ -8,6 +8,6 @@ db.sqlite3
 *.pyc
 
 # Terraform state
-.terraform/*
+terraform/.terraform/*
 .terraform.*
 terraform.*

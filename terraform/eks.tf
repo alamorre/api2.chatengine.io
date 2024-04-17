@@ -79,6 +79,11 @@ resource "kubernetes_deployment" "my_app" {
         container {
           image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest"
           name  = "my-app"
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.app_secret.metadata[0].name
+            }
+          }
           port {
             container_port = 8080
           }

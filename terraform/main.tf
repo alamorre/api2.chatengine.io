@@ -21,11 +21,17 @@ module "vpc" {
   }
 }
 
+variable "cluster_name" {
+  description = "The name of the EKS cluster"
+  type        = string
+  default     = "ce-cluster"
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name    = "my-cluster"
+  cluster_name    = var.cluster_name
   cluster_version = "1.29"
 
   cluster_endpoint_public_access = true
@@ -71,3 +77,4 @@ module "eks" {
     Terraform   = "true"
   }
 }
+

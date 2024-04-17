@@ -63,7 +63,7 @@ resource "kubernetes_deployment" "my_app" {
     }
   }
   spec {
-    replicas = 3
+    replicas = 2
     selector {
       match_labels = {
         app = "myapp"
@@ -81,6 +81,17 @@ resource "kubernetes_deployment" "my_app" {
           name  = "my-app"
           port {
             container_port = 8080
+          }
+          # Add resource requests and limits
+          resources {
+            requests = {
+              cpu    = "500m"
+              memory = "256Mi"
+            }
+            limits = {
+              cpu    = "1000m"
+              memory = "512Mi"
+            }
           }
         }
       }
@@ -101,5 +112,23 @@ resource "kubernetes_service" "my_app" {
       target_port = 8080
     }
     type = "LoadBalancer"
+  }
+}
+
+resource "kubernetes_horizontal_pod_autoscaler" "example" {
+  metadata {
+    name      = "my-app-hpa"
+    namespace = "default"
+  }
+
+  spec {
+    min_replicas                      = 3
+    max_replicas                      = 10
+    target_cpu_utilization_percentage = 50
+    scale_target_ref {
+      api_version = "apps/v1"
+      kind        = "Deployment"
+      name        = "my-app" # Make sure this matches your deployment name
+    }
   }
 }

@@ -62,30 +62,25 @@ resource "kubernetes_deployment" "my_app" {
       app = "myapp"
     }
   }
-
   spec {
     replicas = 3
-
     selector {
       match_labels = {
         app = "myapp"
       }
     }
-
     template {
       metadata {
         labels = {
           app = "myapp"
         }
       }
-
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest" # Use your ECR image URL
+          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest"
           name  = "my-app"
-
           port {
-            container_port = 80
+            container_port = 8080
           }
         }
       }
@@ -97,17 +92,14 @@ resource "kubernetes_service" "my_app" {
   metadata {
     name = "my-app-service"
   }
-
   spec {
     selector = {
       app = "myapp"
     }
-
     port {
       port        = 80
-      target_port = 80
+      target_port = 8080
     }
-
     type = "LoadBalancer"
   }
 }

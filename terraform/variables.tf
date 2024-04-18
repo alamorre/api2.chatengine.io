@@ -12,3 +12,17 @@ variable "image_tag" {
   description = "The tag for the Docker image to use."
   type        = string
 }
+
+variable "db_name" {
+  description = "The name of Postgres DB."
+  type        = string
+}
+
+variable "db_username" {
+  description = "The user name of Postgres DB."
+  type        = string
+}
+variable "db_password" {
+  description = "The user password of Postgres DB."
+  type        = string
+}

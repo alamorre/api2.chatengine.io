@@ -11,5 +11,4 @@ variable "secret_key" {
 variable "image_tag" {
   description = "The tag for the Docker image to use."
   type        = string
-  default     = "latest"  // You can set a default or require it to be passed explicitly.
 }

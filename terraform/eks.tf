@@ -77,7 +77,7 @@ resource "kubernetes_deployment" "my_app" {
       }
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest"
+          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag}"
           name  = "my-app"
           env_from {
             secret_ref {

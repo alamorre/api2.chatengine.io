@@ -4,7 +4,7 @@ resource "kubernetes_secret" "app_secret" {
   }
 
   data = {
-    "PIPELINE" = base64encode("production")
-    # Add other secret data here
+    "PIPELINE"   = var.pipeline
+    "SECRET_KEY" = var.secret_key
   }
 }

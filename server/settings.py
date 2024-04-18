@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t51-bblp!g)ebat7o1mf#%=st(#-@j0*md4-f^k&hpvb8*@idz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Define new user model
 AUTH_USER_MODEL = 'accounts.User'

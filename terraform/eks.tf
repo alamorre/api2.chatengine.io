@@ -63,7 +63,7 @@ resource "kubernetes_deployment" "my_app" {
     }
   }
   spec {
-    replicas = 2
+    replicas = 3
     selector {
       match_labels = {
         app = "myapp"

@@ -7,7 +7,7 @@ import os
 
 def health_check(request):
     return HttpResponse(
-        f"Welcome to {os.getenv("PIPELINE", 'local')}", 
+        f"Welcome to {os.getenv("PIPELINE", 'local')}..", 
         content_type="text/plain"
     )
 

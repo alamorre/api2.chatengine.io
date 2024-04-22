@@ -188,8 +188,10 @@ def pre_delete_project(instance, **kwargs):
         try:
             stripe.Subscription.delete(instance.subscription_id)
         except:
-            from subscriptions.upgrade_email import upgrade_emailer
-            upgrade_emailer.email_subscription_delete_failed(project=instance)
+            pass 
+            # todo: Implement this
+            # from subscriptions.upgrade_email import upgrade_emailer
+            # upgrade_emailer.email_subscription_delete_failed(project=instance)
 
 
 

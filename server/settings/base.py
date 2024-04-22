@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # Apps
     'accounts',
     'projects',
+    'users',
     # Rest Framework
     'rest_framework',
     'rest_framework.authtoken',

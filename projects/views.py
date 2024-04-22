@@ -1,5 +1,7 @@
-import uuid, pytz
+import uuid, pytz, os
 from datetime import datetime, timedelta
+
+import stripe 
 
 from rest_framework.throttling import UserRateThrottle
 from rest_framework import status, permissions
@@ -10,19 +12,14 @@ from django.shortcuts import get_object_or_404, redirect
 
 from accounts.models import User
 
-from chats.models import Chat, ChatPerson, Message
-from chats.serializers import ChatSerializer
+# from chats.models import Chat, ChatPerson, Message
+# from chats.serializers import ChatSerializer
 
-from users.publishers import chat_publisher
 from users.emailer import emailer
-
-from server.settings import stripe, get_secret
 
 from .models import Collaborator, Invite, Person, Promo
 from .serializers import InviteSerializer, ProjectSerializer, PersonSerializer, CollaboratorSerializer
 from .authentication import TokenProjectAuthentication
-
-from tracking.mixpanel import mix_panel
 
 def get_promo_or_none(code: str):
     try:
@@ -58,16 +55,16 @@ class Projects(APIView):
             #     checkout_session = stripe.checkout.Session.create(
             #         billing_address_collection='auto',
             #         line_items=[
-            #             { 'price': get_secret('STRIPE_LIGHT_PLAN', None), 'quantity': 1,},
+            #             { 'price': os.getenv('STRIPE_LIGHT_PLAN', None), 'quantity': 1,},
             #         ],
             #         mode='subscription',
-            #         success_url='{}/projects/{}'.format(get_secret('WEBSITE_URL'), project_json['public_key']),
-            #         cancel_url='{}/projects/{}'.format(get_secret('WEBSITE_URL'), project_json['public_key']),
+            #         success_url='{}/projects/{}'.format(os.getenv('WEBSITE_URL'), project_json['public_key']),
+            #         cancel_url='{}/projects/{}'.format(os.getenv('WEBSITE_URL'), project_json['public_key']),
             #         subscription_data={'trial_period_days': 10 },
             #         metadata={
             #             "project_id": project_json['public_key'], 
             #             "plan_type": "light",
-            #             "webhook_secret": get_secret("STRIPE_WEBHOOK_SECRET")
+            #             "webhook_secret": os.getenv("STRIPE_WEBHOOK_SECRET")
             #         }
             #     )
             #     data = {"project": project_json, "stripe_link": checkout_session.url}
@@ -94,7 +91,6 @@ class ProjectDetails(APIView):
         serializer = ProjectSerializer(project, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            mix_panel.track(str(request.user), 'edit project')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -102,7 +98,6 @@ class ProjectDetails(APIView):
         get_object_or_404(Collaborator, user=request.user, project=request.auth)
         project = request.auth
         project.delete()
-        mix_panel.track(str(request.user), 'delete project')
         return Response({"id": project_id}, status=status.HTTP_200_OK)
 
 
@@ -154,15 +149,15 @@ class ProjectUpgrade(APIView):
         checkout_session = stripe.checkout.Session.create(
             billing_address_collection='auto',
             line_items=[
-                { 'price': get_secret('STRIPE_LIGHT_PLAN', None), 'quantity': 1,},
+                { 'price': os.getenv('STRIPE_LIGHT_PLAN', None), 'quantity': 1,},
             ],
             mode='subscription',
-            success_url='{}/projects/{}'.format(get_secret('WEBSITE_URL'), project_id),
-            cancel_url='{}/projects/{}'.format(get_secret('WEBSITE_URL'), project_id),
+            success_url='{}/projects/{}'.format(os.getenv('WEBSITE_URL'), project_id),
+            cancel_url='{}/projects/{}'.format(os.getenv('WEBSITE_URL'), project_id),
             metadata={
                 "project_id": project_id, 
                 "plan_type": "light",
-                "webhook_secret": get_secret("STRIPE_WEBHOOK_SECRET")
+                "webhook_secret": os.getenv("STRIPE_WEBHOOK_SECRET")
             }
         )
         return Response(checkout_session.url, status=status.HTTP_200_OK)
@@ -198,7 +193,6 @@ class CollaboratorsDetailsWeb(APIView):
         serializer = CollaboratorSerializer(collaborator, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            mix_panel.track(str(request.user), 'edit collaborator')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -207,7 +201,6 @@ class CollaboratorsDetailsWeb(APIView):
         collaborator = get_object_or_404(Collaborator, id=collaborator_id)
         collaborator_json = CollaboratorSerializer(collaborator, many=False).data
         collaborator.delete()
-        mix_panel.track(str(request.user), 'delete collaborator')
         return Response(collaborator_json, status=status.HTTP_200_OK)
 
 
@@ -226,7 +219,6 @@ class ProjectInvitesWeb(APIView):
         serializer = InviteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(project=request.auth, to_email=request.data['to_email'])
-            mix_panel.track(str(request.user), 'new invite')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -246,7 +238,6 @@ class InviteDetailsWeb(APIView):
         if serializer.is_valid():
             invite = serializer.save()
             serializer = InviteSerializer(invite, many=False)
-            mix_panel.track('anon', 'edit invite')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -269,7 +260,6 @@ class InviteDetailsWeb(APIView):
         invite = get_object_or_404(Invite, access_key=invite_key)
         invite_json = InviteSerializer(invite, many=False).data
         invite.delete()
-        mix_panel.track('anon', 'delete invite')
         return Response(invite_json, status=status.HTTP_200_OK)
 
 
@@ -310,7 +300,6 @@ class ProjectPeopleWeb(APIView):
         serializer = PersonSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(project=project)
-            mix_panel.track(str(request.user), 'new person web')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -339,7 +328,6 @@ class PersonDetailsWeb(APIView):
         serializer = PersonSerializer(person, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            mix_panel.track(str(request.user), 'edit person')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -349,7 +337,6 @@ class PersonDetailsWeb(APIView):
         person = get_object_or_404(Person, project=project, pk=person_id)
         person_json = PersonSerializer(person, many=False).data
         person.delete()
-        mix_panel.track(str(request.user), 'delete person')
         return Response(person_json, status=status.HTTP_200_OK)
 
 
@@ -383,7 +370,6 @@ class ChatsWeb(APIView):
         serializer = ChatSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(project=project, admin=person)
-            mix_panel.track(str(request.user), 'new chat web')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -416,7 +402,6 @@ class ChatDetailsWeb(APIView):
         serializer = ChatSerializer(chat, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(admin=admin)
-            mix_panel.track(str(request.user), 'edit chat')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -446,7 +431,8 @@ class ChatDetailsWeb(APIView):
 
         # Publish and return new data
         serializer = ChatSerializer(chat, many=False)
-        chat_publisher.publish_chat_data('edit_chat', serializer.data)
+        # todo: Implement this
+        # chat_publisher.publish_chat_data('edit_chat', serializer.data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -456,5 +442,4 @@ class ChatDetailsWeb(APIView):
         chat = get_object_or_404(Chat, project=project, pk=chat_id)
         chat_json = ChatSerializer(chat, many=False).data
         chat.delete()
-        mix_panel.track(str(request.user), 'delete chat')
         return Response(chat_json, status=status.HTTP_200_OK)

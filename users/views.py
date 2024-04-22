@@ -17,10 +17,8 @@ from chats.serializers import ChatSerializer
 from users.models import Session
 from users.serializers import SessionSerializer
 
-from tracking.mixpanel import mix_panel
-
 from .authentication import UserSecretAuthentication
-from .publishers import chat_publisher
+# from .publishers import chat_publisher
 from .emailer import emailer
 
 class MyDetails(APIView):
@@ -38,8 +36,8 @@ class MyDetails(APIView):
             serializer.save()
             for chat_person in ChatPerson.objects.filter(person=request.user):
                 chat_data = ChatSerializer(chat_person.chat, many=False).data
-                mix_panel.track(str(request.user), 'edit person')
-                chat_publisher.publish_chat_data('edit_chat', chat_data)
+                # todo: Implement this
+                # chat_publisher.publish_chat_data('edit_chat', chat_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -47,7 +45,6 @@ class MyDetails(APIView):
         person = request.user
         person_json = PersonSerializer(person, many=False).data
         person.delete()
-        mix_panel.track(str(request.user), 'delete person api')
         return Response(person_json, status=status.HTTP_200_OK)
 
 
@@ -115,7 +112,6 @@ class PeoplePrivateApi(APIView):
                 return Response({'message': "This username is taken."}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 serializer.save(project=request.auth)
-                mix_panel.track(str(request.user), 'new person api')
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response({'message': 'This user exists'}, status=status.HTTP_400_BAD_REQUEST)
@@ -131,7 +127,6 @@ class PeoplePrivateApi(APIView):
 
         if serializer.is_valid():
             serializer.save(project=request.auth)
-            mix_panel.track(str(request.user), 'new person api')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -155,7 +150,6 @@ class PersonPrivateApi(APIView):
         serializer = PersonSerializer(person, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            mix_panel.track(str(request.user), 'edit person api')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -163,5 +157,4 @@ class PersonPrivateApi(APIView):
         person = get_object_or_404(Person, project=request.auth, pk=person_id)
         person_json = PersonSerializer(person, many=False).data
         person.delete()
-        mix_panel.track(str(request.user), 'delete person api')
         return Response(person_json, status=status.HTTP_200_OK)

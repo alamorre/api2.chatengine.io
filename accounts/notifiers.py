@@ -2,12 +2,11 @@
 
 # from python_http_client.exceptions import HTTPError
 
-# import sendgrid
+# import sendgrid, os
 
 # from accounts.models import User, Reset
-# from server.settings import get_secret
 
-# sg = sendgrid.SendGridAPIClient(get_secret('SEND_GRID_KEY'))
+# sg = sendgrid.SendGridAPIClient(os.getenv('SEND_GRID_KEY'))
 
 
 # class Emailer():
@@ -36,7 +35,7 @@
 
 #     def email_reset_link(self, user: User, reset: Reset):
 #         link = 'https://chatengine.io/reset/{}'.format(str(reset.uuid)) \
-#             if get_secret('PIPELINE') == 'production' else \
+#             if os.getenv('PIPELINE') == 'production' else \
 #             'http://localhost:3000/reset/{}'.format(str(reset.uuid))
 
 #         data = {

@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'accounts',
     'projects',
     'users',
+    'chats',
+    'webhooks',
+    'subscriptions',
     # Rest Framework
     'rest_framework',
     'rest_framework.authtoken',

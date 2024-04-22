@@ -1,12 +1,12 @@
-from django.conf.urls import url
+from django.urls import re_path
 from . import views
 
 app_name = 'users'
 
 urlpatterns = [
-    url(r'^me/$', views.MyDetails.as_view()),
-    url(r'^me/session/$', views.MySession.as_view()),
-    url(r'^$', views.PeoplePrivateApi.as_view()),
-    url(r'^search/$', views.SearchOtherUsers.as_view()),
-    url(r'^(?P<person_id>[0-9]+)/$', views.PersonPrivateApi.as_view()),
+    re_path(r'^me/$', views.MyDetails.as_view()),
+    re_path(r'^me/session/$', views.MySession.as_view()),
+    re_path(r'^$', views.PeoplePrivateApi.as_view()),
+    re_path(r'^search/$', views.SearchOtherUsers.as_view()),
+    re_path(r'^(?P<person_id>[0-9]+)/$', views.PersonPrivateApi.as_view()),
 ]

@@ -5,7 +5,8 @@ from django.contrib.auth.hashers import check_password
 
 from projects.models import Project, Person
 from chats.models import Chat
-from subscriptions.upgrade_email import upgrade_emailer
+# todo: Implement this
+# from subscriptions.upgrade_email import upgrade_emailer
 
 
 def get_chat_id(request):
@@ -32,7 +33,7 @@ class UserSecretAuthentication(authentication.BaseAuthentication):
                 project = Project.objects.get(public_key=public_key)
 
                 if not project.is_active:
-                    upgrade_emailer.email_project_is_inactive(project=project)
+                    # upgrade_emailer.email_project_is_inactive(project=project)
                     raise Exception
 
                 user = Person.objects.get(project=project, username=username)
@@ -44,7 +45,7 @@ class UserSecretAuthentication(authentication.BaseAuthentication):
                 project = Project.objects.get(private_key=private_key)
 
                 if not project.is_active:
-                    upgrade_emailer.email_project_is_inactive(project=project)
+                    # upgrade_emailer.email_project_is_inactive(project=project)
                     raise Exception
 
                 chat_id = get_chat_id(request=request)

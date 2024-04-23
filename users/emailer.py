@@ -10,27 +10,27 @@ class Emailer():
         pass
 
     def email_user_limit(self, project: Project):
-        message = sendgrid.Mail(
-            from_email='no_reply@chatengine.io',
-            to_emails=[str(project.owner)],
-            subject='Chat Engine | User limit reached',
-            html_content="""
-            You reached for user limit for the following Chat Engine project:<br/><br/>
-            <div>Project ID: {}<br/>
-            Project Title: {}<br/>
-            Owner: {}<br/>
-            Limit: {}<br/>
-            Plan: {}</div>""".format(
-                str(project.public_key), 
-                project.title, 
-                project.owner,
-                str(project.monthly_users),
-                project.plan_type
-            )
-        )
         try:
+            message = sendgrid.Mail(
+                from_email='no_reply@chatengine.io',
+                to_emails=[str(project.owner)],
+                subject='Chat Engine | User limit reached',
+                html_content="""
+                You reached for user limit for the following Chat Engine project:<br/><br/>
+                <div>Project ID: {}<br/>
+                Project Title: {}<br/>
+                Owner: {}<br/>
+                Limit: {}<br/>
+                Plan: {}</div>""".format(
+                    str(project.public_key), 
+                    project.title, 
+                    project.owner,
+                    str(project.monthly_users),
+                    project.plan_type
+                )
+            )
             sg.send(message)
         except Exception as e:
-            print(e.message)
+            print(e)
 
 emailer = Emailer()

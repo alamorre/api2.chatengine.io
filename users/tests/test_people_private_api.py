@@ -23,7 +23,7 @@ class GetPeoplePrivateTestCase(APITestCase):
 
     def test_get_people(self):
         response = self.client.get(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             headers={"private-key": str(self.project.private_key)}
         )
         data = json.loads(response.content)
@@ -75,14 +75,14 @@ class GetPeoplePrivateTestCase(APITestCase):
 
     def test_get_people_needs_private_auth(self):
         response = self.client.get(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             headers={"private-key": '...'}
         )
         self.assertEqual(response.status_code, 403)
 
     def test_get_people_not_public_auth(self):
         response = self.client.get(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             headers={
                 "public-key": str(self.project.public_key),
                 "user-name": USER_1,
@@ -101,7 +101,7 @@ class PostPersonPrivateTestCase(APITestCase):
         
     def test_post_person(self):
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -116,7 +116,7 @@ class PostPersonPrivateTestCase(APITestCase):
         self.assertEqual(data['username'], USER_2)
 
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -129,7 +129,7 @@ class PostPersonPrivateTestCase(APITestCase):
 
     def test_post_person_needs_private_auth(self):
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -142,7 +142,7 @@ class PostPersonPrivateTestCase(APITestCase):
 
     def test_post_person_not_public_auth(self):
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -162,7 +162,7 @@ class PostPersonPrivateTestCase(APITestCase):
         self.project.save()
         
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "secret": PASSWORD,
@@ -174,13 +174,14 @@ class PostPersonPrivateTestCase(APITestCase):
         self.assertEqual(data['username'], USER_2)
 
         response = self.client.post(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": 'another-user-hits-limit',
                 "secret": PASSWORD,
             },
             headers={"private-key": str(self.project.private_key)}
         )
+        # print(response.content)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, "You're over your user limit.")
@@ -194,7 +195,7 @@ class PutPersonPrivateTestCase(APITestCase):
 
     def test_put_create_then_get_person(self):
         response = self.client.put(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -209,7 +210,7 @@ class PutPersonPrivateTestCase(APITestCase):
         self.assertEqual(data['username'], USER_2)
 
         response = self.client.put(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -225,7 +226,7 @@ class PutPersonPrivateTestCase(APITestCase):
 
     def test_put_person_needs_private_auth(self):
         response = self.client.put(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,
@@ -238,7 +239,7 @@ class PutPersonPrivateTestCase(APITestCase):
 
     def test_post_person_not_public_auth(self):
         response = self.client.put(
-            'http://127.0.0.1:8000/users',
+            'http://127.0.0.1:8000/users/',
             data={
                 "username": USER_2,
                 "email": USER_2,

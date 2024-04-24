@@ -57,7 +57,7 @@ class Emailer():
         now = datetime.now().replace(tzinfo=pytz.UTC)
         if self.needs_throttle(project.plan_type) and now < project.email_last_sent + timedelta(minutes=5):
             return 'Free throttled', []
-
+        
         # Email every offline message receiver with an email
         sent_list = []
         for person in people:

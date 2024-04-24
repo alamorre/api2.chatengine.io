@@ -1,7 +1,6 @@
 from django.urls import re_path
 
-# Todo: Uncomment the following imports
-# from users.views import PeoplePrivateApi, PersonPrivateApi
+from users.views import PeoplePrivateApi, PersonPrivateApi
 
 from . import views
 
@@ -10,8 +9,8 @@ app_name = 'projects'
 urlpatterns = [
     re_path(r'^$', views.Projects.as_view()),
 
-    # url(r'^people/$', PeoplePrivateApi.as_view()),
-    # url(r'^people/(?P<person_id>[0-9]+)/$', PersonPrivateApi.as_view()),
+    re_path(r'^people/$', PeoplePrivateApi.as_view()),
+    re_path(r'^people/(?P<person_id>[0-9]+)/$', PersonPrivateApi.as_view()),
 
     re_path(r'^(?P<project_id>^([A-Fa-f0-9]{8})(-[A-Fa-f0-9]{4}){3}-[A-Fa-f0-9]{12})/$', views.ProjectDetails.as_view()),
 

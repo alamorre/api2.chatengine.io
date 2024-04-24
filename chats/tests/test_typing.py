@@ -44,33 +44,34 @@ class PostChatTestCase(APITestCase):
         self.assertEqual(data['id'], self.chat.pk)
         self.assertEqual(data['person'], self.person.username)
 
-    def test_typing_throttle(self):
-        time.sleep(1)
-        client = RequestsClient()
-        response = client.post(
-            'http://127.0.0.1:8000/chats/{}/typing/'.format(str(self.chat.pk)),
-            data={},
-            headers={
-                "public-key": str(self.project.public_key),
-                "user-name": user_email_1,
-                "user-secret": user_password_1
-            }
-        )
+    # todo: implement at the load balancer level
+    # def test_typing_throttle(self):
+    #     time.sleep(1)
+    #     client = RequestsClient()
+    #     response = client.post(
+    #         'http://127.0.0.1:8000/chats/{}/typing/'.format(str(self.chat.pk)),
+    #         data={},
+    #         headers={
+    #             "public-key": str(self.project.public_key),
+    #             "user-name": user_email_1,
+    #             "user-secret": user_password_1
+    #         }
+    #     )
 
-        self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.status_code, 200)
 
-        client = RequestsClient()
-        response = client.post(
-            'http://127.0.0.1:8000/chats/{}/typing/'.format(str(self.chat.pk)),
-            data={},
-            headers={
-                "public-key": str(self.project.public_key),
-                "user-name": user_email_1,
-                "user-secret": user_password_1
-            }
-        )
+    #     client = RequestsClient()
+    #     response = client.post(
+    #         'http://127.0.0.1:8000/chats/{}/typing/'.format(str(self.chat.pk)),
+    #         data={},
+    #         headers={
+    #             "public-key": str(self.project.public_key),
+    #             "user-name": user_email_1,
+    #             "user-secret": user_password_1
+    #         }
+    #     )
 
-        self.assertEqual(response.status_code, 429)
+    #     self.assertEqual(response.status_code, 429)
 
     def test_cannot_type_without_auth(self):
         time.sleep(1)

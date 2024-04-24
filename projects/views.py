@@ -12,8 +12,8 @@ from django.shortcuts import get_object_or_404, redirect
 
 from accounts.models import User
 
-# from chats.models import Chat, ChatPerson, Message
-# from chats.serializers import ChatSerializer
+from chats.models import Chat, ChatPerson, Message
+from chats.serializers import ChatSerializer
 
 from users.emailer import emailer
 

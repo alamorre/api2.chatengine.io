@@ -105,11 +105,12 @@ resource "kubernetes_deployment" "my_app" {
 }
 
 resource "kubernetes_service" "my_app_service" {
+  depends_on = [aws_acm_certificate_validation.api_cert_validation]
   metadata {
     name = "my-app-service"
     annotations = {
       "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
-      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = "arn:aws:acm:us-east-1:620457613573:certificate/e6daae9e-a40c-4da6-af5d-66eec2230e38"
+      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
       "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
     }
   }
@@ -154,11 +155,4 @@ data "kubernetes_service" "my_app_lb" {
   ]
 }
 
-resource "aws_route53_record" "api_record" {
-  zone_id    = "Z03630092POA2AW6LC9G5"
-  name       = "api2.chatengine.io"
-  type       = "CNAME"
-  ttl        = "300"
-  records    = [data.kubernetes_service.my_app_lb.status.0.load_balancer.0.ingress.0.hostname]
-  depends_on = [kubernetes_service.my_app_service]
-}
+

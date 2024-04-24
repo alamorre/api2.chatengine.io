@@ -26,3 +26,14 @@ variable "db_password" {
   description = "The user password of Postgres DB."
   type        = string
 }
+
+variable "domain_name" {
+  description = "Domain name for the API"
+  type        = string
+  default     = "api2.chatengine.io"
+}
+
+variable "zone_id" {
+  description = "Route53 Zone ID"
+  type        = string
+}

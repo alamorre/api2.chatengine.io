@@ -4,6 +4,6 @@ output "cluster_endpoint" {
 }
 
 output "my_app_service_hostname" {
-  value       = lookup(kubernetes_service.my_app.status.0.load_balancer.0.ingress.0, "hostname", "")
+  value       = lookup(kubernetes_service.my_app_service.status.0.load_balancer.0.ingress.0, "hostname", "")
   description = "The hostname of the load balancer for the my-app service."
 }

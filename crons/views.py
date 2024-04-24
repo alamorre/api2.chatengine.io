@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 import json
 import pytz
-import channels
 
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.throttling import AnonRateThrottle
@@ -93,21 +92,6 @@ class PruneBusinessChat(APIView):
                 person.delete()
                 count += 1
         return Response({count: count}, status=status.HTTP_200_OK)
-
-
-class ReceiveBuffer(APIView):
-    throttle_classes = [AnonRateThrottle]
-    permission_classes = (permissions.IsAdminUser,)
-
-    def get(self, request):
-        receive_buffer = channels.layers.channel_layers.backends['default'].receive_buffer
-        return Response(
-            {
-                "mem": str(receive_buffer),
-                "len": len(str(receive_buffer).split(',')),
-            },
-            status=status.HTTP_200_OK
-        )
 
 
 class OwnerToAdmin(APIView):

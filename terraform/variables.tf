@@ -37,3 +37,8 @@ variable "zone_id" {
   description = "Route53 Zone ID"
   type        = string
 }
+
+variable "send_grid_key" {
+  description = "SendGrid API Key"
+  type        = string
+}

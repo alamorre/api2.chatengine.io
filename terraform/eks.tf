@@ -154,5 +154,3 @@ data "kubernetes_service" "my_app_lb" {
     kubernetes_service.my_app_service
   ]
 }
-
-

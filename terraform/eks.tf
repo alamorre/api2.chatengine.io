@@ -87,18 +87,25 @@ resource "kubernetes_deployment" "my_app" {
           port {
             container_port = 8080
           }
-          # Add resource requests and limits
           resources {
             requests = {
-              cpu    = "500m"
+              cpu    = "250m"
               memory = "256Mi"
             }
             limits = {
-              cpu    = "1000m"
+              cpu    = "500m"
               memory = "512Mi"
             }
           }
         }
+      }
+    }
+
+    strategy {
+      type = "RollingUpdate"
+      rolling_update {
+        max_surge       = "100%" # Allow for 2x the resources when swapping
+        max_unavailable = "25%"  # Allows up to 25% of the pods to be unavailable during the update
       }
     }
   }
@@ -153,4 +160,39 @@ data "kubernetes_service" "my_app_lb" {
   depends_on = [
     kubernetes_service.my_app_service
   ]
+}
+
+resource "kubernetes_ingress_v1" "my_app_ingress" {
+  metadata {
+    name = "my-app-ingress"
+    annotations = {
+      "kubernetes.io/ingress.class"                = "nginx"
+      "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+    }
+  }
+
+  spec {
+    rule {
+      host = var.domain_name
+      http {
+        path {
+          path = "/*"
+          backend {
+            service {
+              name = kubernetes_service.my_app_service.metadata[0].name
+              port {
+                number = kubernetes_service.my_app_service.spec[0].port[0].port
+              }
+            }
+          }
+        }
+      }
+    }
+
+    # Uncomment and ensure the TLS block is correct if TLS is needed
+    tls {
+      hosts       = [var.domain_name]
+      secret_name = "api2-chatengine-io-tls"
+    }
+  }
 }

@@ -166,12 +166,24 @@ resource "kubernetes_ingress_v1" "my_app_ingress" {
   metadata {
     name = "my-app-ingress"
     annotations = {
-      "kubernetes.io/ingress.class"                = "nginx"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/"
+      "kubernetes.io/ingress.class"                    = "nginx"
+      "nginx.ingress.kubernetes.io/rewrite-target"     = "/"
+      "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
+      "nginx.ingress.kubernetes.io/enable-cors"        = "true"
+      "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.my_app_service.metadata[0].name}"
     }
   }
 
   spec {
+    default_backend {
+      service {
+        name = kubernetes_service.my_app_service.metadata[0].name
+        port {
+          number = kubernetes_service.my_app_service.spec[0].port[0].port
+        }
+      }
+    }
+
     rule {
       host = var.domain_name
       http {
@@ -189,7 +201,6 @@ resource "kubernetes_ingress_v1" "my_app_ingress" {
       }
     }
 
-    # Uncomment and ensure the TLS block is correct if TLS is needed
     tls {
       hosts       = [var.domain_name]
       secret_name = "api2-chatengine-io-tls"

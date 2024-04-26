@@ -147,7 +147,7 @@ resource "kubernetes_horizontal_pod_autoscaler" "example" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = "my-app" # Make sure this matches your deployment name
+      name        = kubernetes_deployment.my_app.metadata[0].name
     }
   }
 }

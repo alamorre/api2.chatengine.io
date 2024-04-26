@@ -1,7 +1,7 @@
 import uuid, pytz, os
 from datetime import datetime, timedelta
 
-import stripe 
+from server.settings import stripe
 
 from rest_framework.throttling import UserRateThrottle
 from rest_framework import status, permissions

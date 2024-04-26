@@ -169,3 +169,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'chat-id',
     'access-key',
 ]
+
+# Stripe for payments
+import stripe
+
+stripe.api_key = os.getenv('STRIPE_KEY')

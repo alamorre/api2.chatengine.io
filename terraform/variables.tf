@@ -1,15 +1,15 @@
-variable "pipeline" {
-  description = "The pipeline: local | production"
+variable "aws_access_key_id" {
+  description = "AWS Access Key ID"
   type        = string
 }
 
-variable "secret_key" {
-  description = "Django's Secret Key for DB salting"
+variable "aws_secret_access_key" {
+  description = "AWS Secret Access Key"
   type        = string
 }
 
-variable "image_tag" {
-  description = "The tag for the Docker image to use."
+variable "aws_storage_bucket_name" {
+  description = "AWS Storage Bucket Name"
   type        = string
 }
 
@@ -33,12 +33,46 @@ variable "domain_name" {
   default     = "api2.chatengine.io"
 }
 
-variable "zone_id" {
-  description = "Route53 Zone ID"
+variable "image_tag" {
+  description = "The tag for the Docker image to use."
+  type        = string
+}
+
+variable "pipeline" {
+  description = "The pipeline: local | production"
+  type        = string
+}
+
+variable "secret_key" {
+  description = "Django's Secret Key for DB salting"
   type        = string
 }
 
 variable "send_grid_key" {
   description = "SendGrid API Key"
+  type        = string
+}
+
+variable "stripe_key" {
+  description = "Stripe API Key"
+  type        = string
+}
+
+variable "stripe_production_plan" {
+  description = "Stripe Production Plan"
+  type        = string
+}
+
+variable "stripe_professional_plan" {
+  description = "Stripe Professional Plan"
+  type        = string
+}
+
+variable "stripe_tax_rate" {
+  description = "Stripe Tax Rate"
+  type        = string
+}
+variable "zone_id" {
+  description = "Route53 Zone ID"
   type        = string
 }

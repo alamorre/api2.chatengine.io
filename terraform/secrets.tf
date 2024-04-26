@@ -3,6 +3,7 @@ resource "kubernetes_secret" "app_secret" {
     name = "app-secret"
   }
 
+  # Alphabetic order
   data = {
     # A
     "AWS_ACCESS_KEY_ID"       = var.aws_access_key_id
@@ -18,10 +19,10 @@ resource "kubernetes_secret" "app_secret" {
     # REDIS_HOST
     # REDIS_PORT
     # S
-    "SECRET_KEY"    = var.secret_key
-    "SEND_GRID_KEY" = var.send_grid_key
-    "STRIPE_KEY"    = var.stripe_key
-    # "STRIPE_LIGHT_PLAN" TODO - not connected?
+    "SECRET_KEY"               = var.secret_key
+    "SEND_GRID_KEY"            = var.send_grid_key
+    "STRIPE_KEY"               = var.stripe_key
+    "STRIPE_LIGHT_PLAN"        = var.stripe_light_plan
     "STRIPE_PRODUCTION_PLAN"   = var.stripe_production_plan
     "STRIPE_PROFESSIONAL_PLAN" = var.stripe_professional_plan
     "STRIPE_TAX_RATE"          = var.stripe_tax_rate

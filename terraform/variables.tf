@@ -58,6 +58,11 @@ variable "stripe_key" {
   type        = string
 }
 
+variable "stripe_light_plan" {
+  description = "Stripe Light Plan"
+  type        = string
+}
+
 variable "stripe_production_plan" {
   description = "Stripe Production Plan"
   type        = string

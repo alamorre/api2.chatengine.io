@@ -1,5 +1,6 @@
 import os 
-import stripe
+
+from server.settings import stripe
 
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle

@@ -11,6 +11,9 @@ def health_check(request):
         content_type="text/plain"
     )
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^accounts/', include('accounts.urls', namespace='accounts')),
@@ -22,4 +25,5 @@ urlpatterns = [
     re_path(r'^subscriptions/', include('subscriptions.urls', namespace='subscriptions')),
     # Health check
     path('', health_check, name='health_check'),
+    path('sentry-debug/', trigger_error),
 ]

@@ -9,7 +9,7 @@ provider "kubernetes" {
 }
 
 resource "aws_iam_policy" "ecr_read" {
-  name        = "ecr-read-policy"
+  name        = "ce-ecr-read-policy"
   description = "Allows EKS to pull images from ECR"
   policy      = <<EOF
     {
@@ -30,7 +30,7 @@ resource "aws_iam_policy" "ecr_read" {
 }
 
 resource "aws_iam_role" "eks_ecr_role" {
-  name = "eks-ecr-role"
+  name = "ce-eks-ecr-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "ecr_read_attach" {
 
 resource "kubernetes_cluster_role_binding" "ecr_role_binding" {
   metadata {
-    name = "ecr-role-binding"
+    name = "ce-eks-ecr-role-binding"
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"

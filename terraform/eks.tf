@@ -4,6 +4,18 @@ variable "cluster_name" {
   default     = "ce-cluster"
 }
 
+variable "pod_name" {
+  description = "The name of the pod"
+  type        = string
+  default     = "ce-api"
+}
+
+variable "pod_label" {
+  description = "The label to apply to api pods"
+  type        = string
+  default     = "ce-api"
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -35,7 +47,7 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    example = {
+    cluster_hpa = {
       min_size     = 1
       max_size     = 10
       desired_size = 1
@@ -55,30 +67,30 @@ module "eks" {
   }
 }
 
-resource "kubernetes_deployment" "my_app" {
+resource "kubernetes_deployment" "ce_api" {
   metadata {
-    name = "my-app"
+    name = var.pod_name
     labels = {
-      app = "myapp"
+      app = var.pod_label
     }
   }
   spec {
     replicas = 3
     selector {
       match_labels = {
-        app = "myapp"
+        app = var.pod_label
       }
     }
     template {
       metadata {
         labels = {
-          app = "myapp"
+          app = var.pod_label
         }
       }
       spec {
         container {
           image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag}"
-          name  = "my-app"
+          name  = var.pod_name
           env_from {
             secret_ref {
               name = kubernetes_secret.app_secret.metadata[0].name
@@ -111,10 +123,10 @@ resource "kubernetes_deployment" "my_app" {
   }
 }
 
-resource "kubernetes_service" "my_app_service" {
+resource "kubernetes_service" "cluster_lb" {
   depends_on = [aws_acm_certificate_validation.api_cert_validation]
   metadata {
-    name = "my-app-service"
+    name = "ce-lb-service"
     annotations = {
       "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
       "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
@@ -123,7 +135,7 @@ resource "kubernetes_service" "my_app_service" {
   }
   spec {
     selector = {
-      app = "myapp"
+      app = var.pod_label
     }
     port {
       name        = "https"
@@ -134,9 +146,9 @@ resource "kubernetes_service" "my_app_service" {
   }
 }
 
-resource "kubernetes_horizontal_pod_autoscaler" "example" {
+resource "kubernetes_horizontal_pod_autoscaler" "cluster_hpa" {
   metadata {
-    name      = "my-app-hpa"
+    name      = "cluster-hpa"
     namespace = "default"
   }
 
@@ -147,39 +159,39 @@ resource "kubernetes_horizontal_pod_autoscaler" "example" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment.my_app.metadata[0].name
+      name        = kubernetes_deployment.ce_api.metadata[0].name
     }
   }
 }
 
-data "kubernetes_service" "my_app_lb" {
+data "kubernetes_service" "cluster_lb" {
   metadata {
-    name = kubernetes_service.my_app_service.metadata[0].name
+    name = kubernetes_service.cluster_lb.metadata[0].name
   }
 
   depends_on = [
-    kubernetes_service.my_app_service
+    kubernetes_service.cluster_lb
   ]
 }
 
-resource "kubernetes_ingress_v1" "my_app_ingress" {
+resource "kubernetes_ingress_v1" "cluster_ingress" {
   metadata {
-    name = "my-app-ingress"
+    name = "ce-api-ingress"
     annotations = {
       "kubernetes.io/ingress.class"                    = "nginx"
       "nginx.ingress.kubernetes.io/rewrite-target"     = "/"
       "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
       "nginx.ingress.kubernetes.io/enable-cors"        = "true"
-      "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.my_app_service.metadata[0].name}"
+      "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.cluster_lb.metadata[0].name}"
     }
   }
 
   spec {
     default_backend {
       service {
-        name = kubernetes_service.my_app_service.metadata[0].name
+        name = kubernetes_service.cluster_lb.metadata[0].name
         port {
-          number = kubernetes_service.my_app_service.spec[0].port[0].port
+          number = kubernetes_service.cluster_lb.spec[0].port[0].port
         }
       }
     }
@@ -191,9 +203,9 @@ resource "kubernetes_ingress_v1" "my_app_ingress" {
           path = "/*"
           backend {
             service {
-              name = kubernetes_service.my_app_service.metadata[0].name
+              name = kubernetes_service.cluster_lb.metadata[0].name
               port {
-                number = kubernetes_service.my_app_service.spec[0].port[0].port
+                number = kubernetes_service.cluster_lb.spec[0].port[0].port
               }
             }
           }

@@ -53,6 +53,11 @@ variable "send_grid_key" {
   type        = string
 }
 
+variable "sentry_dsn" {
+  description = "Sentry DSN"
+  type        = string
+}
+
 variable "stripe_key" {
   description = "Stripe API Key"
   type        = string

@@ -16,11 +16,11 @@ resource "kubernetes_secret" "app_secret" {
     # P
     "PIPELINE" = var.pipeline
     # R - TODO: Redis host + port
-    # REDIS_HOST
-    # REDIS_PORT
+    # REDIS_HOST + REDIS_PORT
     # S
     "SECRET_KEY"               = var.secret_key
     "SEND_GRID_KEY"            = var.send_grid_key
+    "SENTRY_DSN"               = var.sentry_dsn
     "STRIPE_KEY"               = var.stripe_key
     "STRIPE_LIGHT_PLAN"        = var.stripe_light_plan
     "STRIPE_PRODUCTION_PLAN"   = var.stripe_production_plan

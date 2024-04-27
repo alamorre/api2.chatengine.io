@@ -55,7 +55,7 @@ module "eks" {
   }
 }
 
-resource "kubernetes_deployment" "my_app" {
+resource "kubernetes_deployment" "ce_api" {
   metadata {
     name = "my-app"
     labels = {
@@ -147,7 +147,7 @@ resource "kubernetes_horizontal_pod_autoscaler" "example" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment.my_app.metadata[0].name
+      name        = kubernetes_deployment.ce_api.metadata[0].name
     }
   }
 }

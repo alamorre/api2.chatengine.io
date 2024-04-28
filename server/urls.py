@@ -5,9 +5,17 @@ from django.urls import path
 from django.http import HttpResponse
 import os
 
+from server.utils.redis import RedisClient
+
+r = RedisClient()
+
 def health_check(request):
+    key = 'test'
+    r.client.set(key, 'pass')
+    value = r.client.get(key)
+    r.client.delete(key)
     return HttpResponse(
-        f"Welcome to {os.getenv("PIPELINE", 'local')}..", 
+        f"Pipelene: {os.getenv("PIPELINE", 'local')}\nRedis: {value}", 
         content_type="text/plain"
     )
 
@@ -22,4 +30,5 @@ urlpatterns = [
     re_path(r'^subscriptions/', include('subscriptions.urls', namespace='subscriptions')),
     # Health check
     path('', health_check, name='health_check'),
+    path('health/', health_check, name='health_check'),
 ]

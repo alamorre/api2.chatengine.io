@@ -15,8 +15,9 @@ resource "kubernetes_secret" "app_secret" {
     "DB_USER_PW" = var.db_password
     # P
     "PIPELINE" = var.pipeline
-    # R - TODO: Redis host + port
-    # REDIS_HOST + REDIS_PORT
+    # R
+    "REDIS_HOST" = var.redis_host
+    "REDIS_PORT" = var.redis_port
     # S
     "SECRET_KEY"               = var.secret_key
     "SEND_GRID_KEY"            = var.send_grid_key

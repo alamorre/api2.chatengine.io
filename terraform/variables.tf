@@ -43,6 +43,16 @@ variable "pipeline" {
   type        = string
 }
 
+variable "redis_host" {
+  description = "Redis Host"
+  type        = string
+}
+
+variable "redis_port" {
+  description = "Redis Port"
+  type        = string
+}
+
 variable "secret_key" {
   description = "Django's Secret Key for DB salting"
   type        = string

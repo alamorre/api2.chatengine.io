@@ -169,16 +169,15 @@ def post_save_project(instance, created, **kwargs):
 
 @receiver(post_save, sender=Person)
 def post_save_person(instance, created, **kwargs):
-    pass # Todo: Implement this
-    # from webhooks.sender import hook
-    # from .serializers import PersonSerializer
-    # from projects.serializers import ProjectSerializer
-    # person_json = PersonSerializer(instance, many=False).data
-    # project_json = ProjectSerializer(instance.project, many=False).data
-    # if created:
-    #     hook.post(event_trigger='On New User', project_json=project_json, person_json=person_json)
-    # else:
-    #     hook.post(event_trigger='On Edit User', project_json=project_json, person_json=person_json)
+    from webhooks.sender import hook
+    from .serializers import PersonSerializer
+    from projects.serializers import ProjectSerializer
+    person_json = PersonSerializer(instance, many=False).data
+    project_json = ProjectSerializer(instance.project, many=False).data
+    if created:
+        hook.post(event_trigger='On New User', project_json=project_json, person_json=person_json)
+    else:
+        hook.post(event_trigger='On Edit User', project_json=project_json, person_json=person_json)
 
 
 @receiver(pre_delete, sender=Project)
@@ -188,22 +187,19 @@ def pre_delete_project(instance, **kwargs):
         try:
             stripe.Subscription.delete(instance.subscription_id)
         except:
-            pass 
-            # todo: Implement this
-            # from subscriptions.upgrade_email import upgrade_emailer
-            # upgrade_emailer.email_subscription_delete_failed(project=instance)
+            from subscriptions.upgrade_email import upgrade_emailer
+            upgrade_emailer.email_subscription_delete_failed(project=instance)
 
 
 
 @receiver(pre_delete, sender=Person)
 def pre_delete_person(instance, **kwargs):
-    pass # Todo: Implement this
-    # from webhooks.sender import hook
-    # from .serializers import PersonSerializer
-    # from projects.serializers import ProjectSerializer
-    # person_json = PersonSerializer(instance, many=False).data
-    # project_json = ProjectSerializer(instance.project, many=False).data
-    # hook.post(event_trigger='On Delete User', project_json=project_json, person_json=person_json)
+    from webhooks.sender import hook
+    from .serializers import PersonSerializer
+    from projects.serializers import ProjectSerializer
+    person_json = PersonSerializer(instance, many=False).data
+    project_json = ProjectSerializer(instance.project, many=False).data
+    hook.post(event_trigger='On Delete User', project_json=project_json, person_json=person_json)
 
 
 @receiver(post_save, sender=Invite)

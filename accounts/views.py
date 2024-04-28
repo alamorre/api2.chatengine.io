@@ -16,10 +16,10 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import User, Reset
-# from .notifiers import Emailer
+from .notifiers import Emailer
 from .serializers import MFASerializer, UserSerializer, UserPublicSerializer
 
-# emailer = Emailer()
+emailer = Emailer()
 
 
 def health_check(request):
@@ -90,7 +90,7 @@ class Accounts(APIView):
             query[0].uuid = uuid.uuid4()
             query[0].expiry = now + timedelta(hours=1)
             query[0].save()
-            # emailer.email_reset_link(user, query[0])
+            emailer.email_reset_link(user, query[0])
         except ObjectDoesNotExist:
             pass
         return Response({"message": "Reset link was sent if the user exists."}, status=status.HTTP_200_OK)

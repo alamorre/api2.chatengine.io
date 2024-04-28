@@ -1,7 +1,6 @@
 import os 
 
-# Set debug to False
-DEBUG = True
+DEBUG = False
 
 # Set up PostgreSQL Database
 DATABASES = {

@@ -172,5 +172,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # Stripe for payments
 import stripe
-
 stripe.api_key = os.getenv('STRIPE_KEY')
+
+# Redis for caching
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)

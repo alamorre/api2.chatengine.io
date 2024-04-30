@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main
-      - develop # Include any branches you want PRs to trigger this action
 
 jobs:
   docker-build:
@@ -16,6 +15,4 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . -t api2.chatengine.io:latest
-          # TODO: run your container to verify it works
-          # docker run --rm myapp:latest
+          docker build ./api.chatengine.io -t api2.chatengine.io:latest

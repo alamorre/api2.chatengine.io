@@ -30,7 +30,7 @@ jobs:
           IMAGE_TAG: latest
           COMMIT_SHA: ${{ env.COMMIT_SHA }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$COMMIT_SHA .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$COMMIT_SHA -f api.chatengine.io/Dockerfile api.chatengine.io/
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$COMMIT_SHA
 

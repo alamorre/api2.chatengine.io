@@ -15,5 +15,6 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "ws": "^8.17.0"
-  }
+  },
+  "type": "module"
 }

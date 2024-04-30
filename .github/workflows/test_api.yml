@@ -1,4 +1,4 @@
-name: (CI Tests) API Django
+name: (CI Tests) api.chatengine.io
 
 on:
   pull_request:

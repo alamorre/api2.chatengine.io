@@ -1,4 +1,4 @@
-name: (CI Tests) Jest Node
+name: (CI Tests) ws.chatengine.io
 
 on:
   pull_request:
@@ -7,11 +7,11 @@ on:
 
 jobs:
   test:
-    name: Run Jest
+    name: Jest tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [21.x]
+        node-version: [10.x]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

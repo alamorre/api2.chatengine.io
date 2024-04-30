@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "Adam La Morre",
   "license": "ISC",
   "dependencies": {
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.43.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "ws": "^8.17.0"
   }
 }

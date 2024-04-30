@@ -1,5 +1,5 @@
 const WebSocket = require("ws");
-const { startServer } = require("../src/server"); // Correct import of your server setup
+const { startServer } = require("../src/server");
 
 describe("WebSocket Server Tests", () => {
   let server;
@@ -11,15 +11,19 @@ describe("WebSocket Server Tests", () => {
     client.on("open", done);
   });
 
-  afterAll(() => {
-    client.close();
-    // server.us_listen_socket.close(); // uWebSocket auomatically closes the server when the process exits
+  afterAll((done) => {
+    // Close the client and ensure it closes before stopping the server
+    client.on("close", () => {
+      server.stop(); // Stop the server after client disconnects
+      done(); // Finish the cleanup process
+    });
+
+    client.close(); // Initiates the closing of the WebSocket client
   });
 
   test("Server echoes messages", (done) => {
     const message = "Hello WebSocket!";
     client.on("message", (data) => {
-      // Ensure data is converted to a string if it's a Buffer
       const receivedMessage =
         data instanceof Buffer ? data.toString("utf8") : data;
       expect(receivedMessage).toBe(message);

@@ -2,23 +2,38 @@ const uWS = require("uWebSockets.js");
 const port = 9001;
 
 function startServer() {
-  uWS
+  let token; // This will hold the listen token
+
+  const app = uWS
     .App()
     .ws("/*", {
-      open: (ws) => {},
-      message: (ws, message, isBinary) => {
-        ws.send(message, false);
+      open: (ws) => {
+        console.log("A WebSocket connected");
       },
-      close: (ws, code, message) => {},
+      message: (ws, message, isBinary) => {
+        ws.send(message, isBinary);
+      },
+      close: (ws, code, message) => {
+        console.log("WebSocket closed");
+      },
     })
-    .listen(port, (token) => {
-      if (token) {
+    .listen(port, (listenToken) => {
+      if (listenToken) {
         console.log(`WebSocket server listening on port ${port}`);
+        token = listenToken;
       } else {
         console.log("Failed to listen on port " + port);
       }
     });
-  return uWS;
+
+  return {
+    app,
+    stop: () => {
+      if (token) {
+        uWS.us_listen_socket_close(token);
+      }
+    },
+  };
 }
 
 module.exports = { startServer };

@@ -13,15 +13,18 @@ describe("WebSocket Server Tests", () => {
 
   afterAll(() => {
     client.close();
-    server.us_listen_socket.close(); // Close the uWebSocket server properly
+    // server.us_listen_socket.close(); // uWebSocket auomatically closes the server when the process exits
   });
 
   test("Server echoes messages", (done) => {
     const message = "Hello WebSocket!";
     client.on("message", (data) => {
-      expect(data).toBe(message);
+      // Ensure data is converted to a string if it's a Buffer
+      const receivedMessage =
+        data instanceof Buffer ? data.toString("utf8") : data;
+      expect(receivedMessage).toBe(message);
       done();
     });
-    client.send(message);
+    client.send(message, done);
   });
 });

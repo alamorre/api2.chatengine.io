@@ -5,17 +5,11 @@ function startServer() {
   uWS
     .App()
     .ws("/*", {
-      /* WebSocket behavior */
-      open: (ws) => {
-        console.log("A WebSocket connected via URL: " + ws.url);
-      },
+      open: (ws) => {},
       message: (ws, message, isBinary) => {
-        /* Echo the message back */
-        ws.send(message, isBinary);
+        ws.send(message, false);
       },
-      close: (ws, code, message) => {
-        console.log("WebSocket closed");
-      },
+      close: (ws, code, message) => {},
     })
     .listen(port, (token) => {
       if (token) {

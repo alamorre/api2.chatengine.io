@@ -1,4 +1,4 @@
-name: Django (CI Tests)
+name: (CI Tests) API Django
 
 on:
   pull_request:

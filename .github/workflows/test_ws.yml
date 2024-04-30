@@ -1,0 +1,31 @@
+name: (CI Tests) Jest Node
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Jest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [21.x]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        working-directory: ws.chatengine.io
+        run: npm install
+
+      - name: Run Jest tests
+        working-directory: ws.chatengine.io
+        run: npm test

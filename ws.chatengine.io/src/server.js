@@ -8,6 +8,9 @@ function startServer() {
   const app = uWS
     .App()
     .ws("/person", {
+      compression: uWS.SHARED_COMPRESSOR,
+      maxPayloadLength: 16 * 1024 * 1024,
+      idleTimeout: 300,
       upgrade: (res, req, context) => {
         // Example of checking headers
         const customHeader = req.getHeader("custom-header");

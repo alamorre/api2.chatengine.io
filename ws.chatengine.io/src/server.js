@@ -13,10 +13,16 @@ function startServer() {
       idleTimeout: 300,
       upgrade: (res, req, context) => {
         // Example of checking headers
-        const customHeader = req.getHeader("custom-header");
-        if (customHeader === "HeaderValue") {
+        const publicKey = req.getHeader("public-key");
+        const username = req.getHeader("username");
+        const secret = req.getHeader("secret");
+        if (
+          publicKey === "abc" &&
+          username === "adam" &&
+          secret === "pass1234"
+        ) {
           res.upgrade(
-            { customHeader }, // Attach properties to ws object if needed
+            { publicKey, username, secret }, // Attach properties to ws object if needed
             req.getHeader("sec-websocket-key"), // Required headers
             req.getHeader("sec-websocket-protocol"), // Required headers
             req.getHeader("sec-websocket-extensions"), // Required headers
@@ -27,7 +33,7 @@ function startServer() {
         }
       },
       open: (ws) => {
-        console.log("Custom Header in open:", ws.customHeader);
+        console.log("Custom Header in open:", ws.publicKey);
       },
       message: (ws, message, isBinary) => {
         ws.send(message, isBinary);

@@ -1,9 +1,12 @@
-export default function upgrade(res, req, context) {
+import auth from "../lib/auth.js";
+
+export default async function upgrade(res, req, context) {
   const publicKey = req.getHeader("public-key");
   const username = req.getHeader("username");
   const secret = req.getHeader("secret");
 
-  const authenticated = auth(publicKey, username, secret);
+  const authenticated = await auth(publicKey, username, secret);
+  console.log("authenticated", authenticated);
 
   if (authenticated) {
     res.upgrade(

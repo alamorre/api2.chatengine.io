@@ -1,13 +1,20 @@
 const WebSocket = require("ws");
 const { startServer } = require("../src/server");
 
+const wsUrl = "ws://localhost:9001/person"; // Adjust the URL as needed
+const options = {
+  headers: {
+    "Custom-Header": "HeaderValue", // Example custom header
+  },
+};
+
 describe("WebSocket Server Tests", () => {
   let server;
   let client;
 
   beforeAll((done) => {
     server = startServer();
-    client = new WebSocket("ws://localhost:9001");
+    client = new WebSocket(wsUrl, options);
     client.on("open", done);
   });
 

@@ -10,7 +10,7 @@ export const redis = new Redis({
   port: process.env.REDIS_PORT,
 });
 
-const port = process.env.PORT || 9001;
+const port = 9001;
 
 app.listen(port, (listenToken) => {
   if (listenToken) {

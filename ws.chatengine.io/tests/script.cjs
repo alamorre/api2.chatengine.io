@@ -15,8 +15,12 @@ const ws = new WebSocket(wsUrl, options);
 
 ws.on("open", function open() {
   console.log("Connection successfully opened");
-  ws.send('{"message":"Hello, world!"}');
-  ws.close();
+  setTimeout(() => {
+    ws.send('{"message":"Hello, world!"}');
+  }, 500);
+  setTimeout(() => {
+    ws.close();
+  }, 500);
 });
 
 ws.on("message", function incoming(data) {

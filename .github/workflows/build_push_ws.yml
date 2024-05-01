@@ -1,4 +1,4 @@
-name: WS Build & Deploy
+name: (Push) ws.chatengine.io
 
 on:
   workflow_dispatch:

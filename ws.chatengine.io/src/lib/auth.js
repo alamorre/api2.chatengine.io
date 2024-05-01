@@ -1,11 +1,6 @@
 import axios from "axios";
-import Redis from "ioredis";
 
-// Connect to Redis
-const redis = new Redis({
-  host: "localhost",
-  port: 6379,
-});
+import { redis } from "../main.js";
 
 export default async function auth(project, username, secret) {
   const cacheKey = `auth-${project}-${username}-${secret}`;

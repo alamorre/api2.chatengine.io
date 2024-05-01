@@ -34,3 +34,8 @@ ws.on("close", function close() {
 ws.on("error", function error(err) {
   console.error("Connection error:", err.message);
 });
+
+// Output:
+// Connection successfully opened
+// Received: {"message":"Hello, world!"}
+// Connection closed

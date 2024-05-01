@@ -14,7 +14,7 @@ export default function upgrade(res, req, context) {
     console.error("Request was aborted by the client");
     res.aborted = true; // You can use a flag to check if the response was aborted
   });
-  console.log(project, username, secret);
+
   auth(project, username, secret)
     .then((authenticated) => {
       if (res.aborted) return; // Do not use res if it has been marked as aborted

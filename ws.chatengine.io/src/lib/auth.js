@@ -1,9 +1,8 @@
 import axios from "axios";
 
-const url = "http://127.0.0.1:8000/users/me/";
-
 export default async function auth(project, username, secret) {
   try {
+    const url = `${process.env.API_URL}/users/me/`;
     const response = await axios.get(url, {
       headers: {
         "project-id": project,

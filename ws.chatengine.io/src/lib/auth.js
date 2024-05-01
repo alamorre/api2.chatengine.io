@@ -1,6 +1,22 @@
 import axios from "axios";
+import Redis from "ioredis";
+
+// Connect to Redis
+const redis = new Redis({
+  host: "localhost",
+  port: 6379,
+});
 
 export default async function auth(project, username, secret) {
+  const cacheKey = `auth-${project}-${username}-${secret}`;
+
+  // Try to get cached result from Redis
+  const cachedResult = await redis.get(cacheKey);
+  if (cachedResult !== null) {
+    console.log(`Returning cached result: ${cachedResult}`);
+    return cachedResult === "true"; // Redis stores data as strings
+  }
+
   try {
     const url = `${process.env.API_URL}/users/me/`;
     const response = await axios.get(url, {
@@ -10,9 +26,14 @@ export default async function auth(project, username, secret) {
         "user-secret": secret,
       },
     });
-    return response.status === 200;
+
+    const isSuccess = response.status === 200;
+    // Store the result in Redis with a TTL of 15 minutes (900 seconds)
+    await redis.set(cacheKey, isSuccess.toString(), "EX", 900);
+    return isSuccess;
   } catch (e) {
-    console.log("Upgraded failed", e.response.status, e.response.statusText);
+    console.log("Auth failed", e.response && e.response.status);
+    await redis.set(cacheKey, "false", "EX", 900);
     return false;
   }
 }

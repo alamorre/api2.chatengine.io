@@ -4,9 +4,9 @@ const WebSocket = require("ws");
 const wsUrl = "ws://localhost:9001/person"; // Adjust the URL as needed
 const options = {
   headers: {
-    "public-key": "abc",
-    username: "adam",
-    secret: "pass1234",
+    "project-id": "c5394dc3-a877-4125-ace1-4baed7a98447",
+    "user-name": "adam",
+    "user-secret": "pass1234",
   },
 };
 

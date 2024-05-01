@@ -1,0 +1,32 @@
+name: (CI Tests) ws.chatengine.io
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Jest tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: ws.chatengine.io/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ws.chatengine.io/
+
+      - name: Run Jest tests
+        run: npm test
+        working-directory: ws.chatengine.io/

@@ -88,8 +88,6 @@ data "kubernetes_service" "cluster_lb" {
   ]
 }
 
-
-
 resource "kubernetes_ingress_v1" "cluster_ingress" {
   metadata {
     name = "ce-api-ingress"

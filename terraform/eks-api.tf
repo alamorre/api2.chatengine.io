@@ -1,5 +1,5 @@
 variable "api_pod_name" {
-  description = "The name of the pod"
+  description = "The name of the api pod"
   type        = string
   default     = "ce-api"
 }
@@ -10,7 +10,7 @@ variable "api_pod_label" {
   default     = "ce-api"
 }
 
-resource "kubernetes_deployment" "ce_api" {
+resource "kubernetes_deployment" "api_deployment" {
   metadata {
     name = var.api_pod_name
     labels = {
@@ -32,7 +32,7 @@ resource "kubernetes_deployment" "ce_api" {
       }
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.api_image_tag}"
+          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag_api}"
           name  = var.api_pod_name
           env_from {
             secret_ref {
@@ -67,9 +67,9 @@ resource "kubernetes_deployment" "ce_api" {
 }
 
 
-resource "kubernetes_horizontal_pod_autoscaler" "cluster_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler" "api_hpa" {
   metadata {
-    name      = "cluster-hpa"
+    name      = "ce-api-hpa"
     namespace = "default"
   }
 
@@ -80,7 +80,7 @@ resource "kubernetes_horizontal_pod_autoscaler" "cluster_hpa" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment.ce_api.metadata[0].name
+      name        = kubernetes_deployment.api_deployment.metadata[0].name
     }
   }
 }

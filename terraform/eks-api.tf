@@ -4,13 +4,13 @@ variable "cluster_name" {
   default     = "ce-cluster"
 }
 
-variable "pod_name" {
+variable "api_pod_name" {
   description = "The name of the pod"
   type        = string
   default     = "ce-api"
 }
 
-variable "pod_label" {
+variable "api_pod_label" {
   description = "The label to apply to api pods"
   type        = string
   default     = "ce-api"
@@ -69,28 +69,28 @@ module "eks" {
 
 resource "kubernetes_deployment" "ce_api" {
   metadata {
-    name = var.pod_name
+    name = var.api_pod_name
     labels = {
-      app = var.pod_label
+      app = var.api_pod_label
     }
   }
   spec {
-    replicas = 3
+    replicas = 1
     selector {
       match_labels = {
-        app = var.pod_label
+        app = var.api_pod_label
       }
     }
     template {
       metadata {
         labels = {
-          app = var.pod_label
+          app = var.api_pod_label
         }
       }
       spec {
         container {
           image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag}"
-          name  = var.pod_name
+          name  = var.api_pod_name
           env_from {
             secret_ref {
               name = kubernetes_secret.app_secret.metadata[0].name
@@ -135,7 +135,7 @@ resource "kubernetes_service" "cluster_lb" {
   }
   spec {
     selector = {
-      app = var.pod_label
+      app = var.api_pod_label
     }
     port {
       name        = "https"
@@ -153,7 +153,7 @@ resource "kubernetes_horizontal_pod_autoscaler" "cluster_hpa" {
   }
 
   spec {
-    min_replicas                      = 3
+    min_replicas                      = 1
     max_replicas                      = 10
     target_cpu_utilization_percentage = 50
     scale_target_ref {

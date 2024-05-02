@@ -38,8 +38,8 @@ variable "domain_name" {
   default     = "api2.chatengine.io"
 }
 
-variable "image_tag" {
-  description = "The tag for the Docker image to use."
+variable "api_image_tag" {
+  description = "The tag for the api.chatengine.io Docker image."
   type        = string
 }
 

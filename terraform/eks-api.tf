@@ -84,3 +84,20 @@ resource "kubernetes_horizontal_pod_autoscaler" "api_hpa" {
     }
   }
 }
+
+resource "kubernetes_service" "api_service" {
+  metadata {
+    name = "ce-api-service"
+  }
+  spec {
+    selector = {
+      app = var.api_pod_label
+    }
+    type = "ClusterIP"
+    port {
+      name        = "https"
+      port        = 8000
+      target_port = 8080
+    }
+  }
+}

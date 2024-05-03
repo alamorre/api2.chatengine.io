@@ -83,3 +83,22 @@ resource "kubernetes_horizontal_pod_autoscaler" "ws_hpa" {
     }
   }
 }
+
+
+
+resource "kubernetes_service" "ws_service" {
+  metadata {
+    name = "ce-ws-service"
+  }
+  spec {
+    selector = {
+      app = var.ws_pod_label
+    }
+    type = "ClusterIP"
+    port {
+      name        = "https"
+      port        = 8000
+      target_port = 9001
+    }
+  }
+}

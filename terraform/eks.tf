@@ -55,81 +55,170 @@ module "eks" {
   }
 }
 
-resource "kubernetes_service" "cluster_lb" {
-  depends_on = [aws_acm_certificate_validation.api_cert_validation]
-  metadata {
-    name = "ce-lb-service"
-    annotations = {
-      "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
-      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
-      "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
-    }
-  }
-  spec {
-    selector = {
-      app = var.api_pod_label
-    }
-    port {
-      name        = "https"
-      port        = 443
-      target_port = 8080
-    }
-    type = "LoadBalancer"
+
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
   }
 }
 
-data "kubernetes_service" "cluster_lb" {
+resource "helm_release" "nginx_ingress" {
+  name       = "nginx-ingress"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "default"
+
+  set {
+    name  = "controller.service.type"
+    value = "ClusterIP"
+  }
+}
+
+resource "kubernetes_service" "nginx_ingress_lb" {
   metadata {
-    name = kubernetes_service.cluster_lb.metadata[0].name
+    name = "nginx-ingress-lb"
+  }
+  spec {
+    type = "LoadBalancer"
+    selector = {
+      "app.kubernetes.io/name"     = "ingress-nginx"
+      "app.kubernetes.io/instance" = "nginx-ingress"
+    }
+    port {
+      port        = 80
+      target_port = 80
+    }
+  }
+}
+
+data "kubernetes_service" "nginx_ingress_lb" {
+  metadata {
+    name = kubernetes_service.nginx_ingress_lb.metadata[0].name
   }
 
   depends_on = [
-    kubernetes_service.cluster_lb
+    kubernetes_service.nginx_ingress_lb
   ]
 }
 
-resource "kubernetes_ingress_v1" "cluster_ingress" {
+resource "kubernetes_ingress_v1" "example" {
   metadata {
-    name = "ce-api-ingress"
+    name = "api-ingress"
     annotations = {
-      "kubernetes.io/ingress.class"                    = "nginx"
-      "nginx.ingress.kubernetes.io/rewrite-target"     = "/"
-      "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
-      "nginx.ingress.kubernetes.io/enable-cors"        = "true"
-      "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.cluster_lb.metadata[0].name}"
+      "nginx.ingress.kubernetes.io/rewrite-target" = "/"
     }
   }
 
   spec {
-    default_backend {
-      service {
-        name = kubernetes_service.cluster_lb.metadata[0].name
-        port {
-          number = kubernetes_service.cluster_lb.spec[0].port[0].port
-        }
-      }
-    }
-
+    ingress_class_name = "nginx"
     rule {
-      host = var.domain_name
       http {
         path {
-          path = "/*"
+          path      = "/admin(/|$)(.*)"
+          path_type = "Prefix"
           backend {
             service {
-              name = kubernetes_service.cluster_lb.metadata[0].name
+              name = "ce-ws-service"
               port {
-                number = kubernetes_service.cluster_lb.spec[0].port[0].port
+                number = kubernetes_service.ws_service.spec[0].port[0].port
+              }
+            }
+          }
+        }
+        path {
+          path      = "/(.*)"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "ce-api-service"
+              port {
+                number = kubernetes_service.api_service.spec[0].port[0].port
               }
             }
           }
         }
       }
     }
-
-    tls {
-      hosts       = [var.domain_name]
-      secret_name = "api2-chatengine-io-tls"
-    }
   }
 }
+
+
+
+# resource "kubernetes_service" "cluster_lb" {
+# depends_on = [aws_acm_certificate_validation.api_cert_validation]
+#   metadata {
+#     name = "ce-lb-service"
+# annotations = {
+#   "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
+#   "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
+#   "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
+# }
+#   }
+#   spec {
+#     selector = {
+#       app = var.api_pod_label
+#     }
+#     port {
+#       name        = "https"
+#       port        = 443
+#       target_port = 8080
+#     }
+#     type = "LoadBalancer"
+#   }
+# }
+
+# data "kubernetes_service" "cluster_lb" {
+#   metadata {
+#     name = kubernetes_service.cluster_lb.metadata[0].name
+#   }
+
+#   depends_on = [
+#     kubernetes_service.cluster_lb
+#   ]
+# }
+
+# resource "kubernetes_ingress_v1" "cluster_ingress" {
+#   metadata {
+#     name = "ce-api-ingress"
+#     annotations = {
+#       "kubernetes.io/ingress.class"                    = "nginx"
+#       "nginx.ingress.kubernetes.io/rewrite-target"     = "/"
+#       "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
+#       "nginx.ingress.kubernetes.io/enable-cors"        = "true"
+#       "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.cluster_lb.metadata[0].name}"
+#     }
+#   }
+
+#   spec {
+#     default_backend {
+#       service {
+#         name = kubernetes_service.cluster_lb.metadata[0].name
+#         port {
+#           number = kubernetes_service.cluster_lb.spec[0].port[0].port
+#         }
+#       }
+#     }
+
+#     rule {
+#       host = var.domain_name
+#       http {
+#         path {
+#           path = "/*"
+#           backend {
+#             service {
+#               name = kubernetes_service.cluster_lb.metadata[0].name
+#               port {
+#                 number = kubernetes_service.cluster_lb.spec[0].port[0].port
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+
+#     tls {
+#       hosts       = [var.domain_name]
+#       secret_name = "api2-chatengine-io-tls"
+#     }
+#   }
+# }

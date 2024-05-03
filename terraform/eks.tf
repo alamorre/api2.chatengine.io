@@ -72,9 +72,14 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.service.type"
     value = "ClusterIP"
   }
+
+  # Deploys the NGINX Ingress Controller using Helm. This controller
+  # manages external access to the services in a Kubernetes cluster,
+  # typically HTTP. It provides load balancing, SSL termination,
+  # and name-based virtual hosting.
 }
 
-resource "kubernetes_service" "nginx_ingress_lb" {
+resource "kubernetes_service" "ingress_lb" {
   depends_on = [aws_acm_certificate_validation.api_cert_validation]
 
   metadata {
@@ -96,19 +101,27 @@ resource "kubernetes_service" "nginx_ingress_lb" {
       target_port = 80
     }
   }
+
+  # Configures a LoadBalancer service to expose the NGINX Ingress Controller on port 443 with SSL termination.
+  # Traffic on port 443 is received by this LoadBalancer, which terminates the SSL connection using the specified ACM certificate.
+  # After decrypting the traffic, it is forwarded to port 80 of the NGINX Ingress Controller pods.
+  # This setup enables secure HTTPS access to applications managed by the ingress controller, leveraging AWS's native load balancing features.
 }
 
-data "kubernetes_service" "nginx_ingress_lb" {
+data "kubernetes_service" "ingress_lb" {
   metadata {
-    name = kubernetes_service.nginx_ingress_lb.metadata[0].name
+    name = kubernetes_service.ingress_lb.metadata[0].name
   }
 
   depends_on = [
-    kubernetes_service.nginx_ingress_lb
+    kubernetes_service.ingress_lb
   ]
+
+  # Meta-data on the NGINX Ingress Controller LoadBalancer service.
+  # Needed for linking the LoadBalancer to the Route 53 DNS record.
 }
 
-resource "kubernetes_ingress_v1" "example" {
+resource "kubernetes_ingress_v1" "ingress_policy" {
   metadata {
     name = "api-ingress"
     annotations = {
@@ -121,7 +134,7 @@ resource "kubernetes_ingress_v1" "example" {
     rule {
       http {
         path {
-          path      = "/admin(/|$)(.*)"
+          path      = "/ws(/|$)(.*)"
           path_type = "Prefix"
           backend {
             service {
@@ -152,85 +165,7 @@ resource "kubernetes_ingress_v1" "example" {
       secret_name = "api2-chatengine-io-tls"
     }
   }
+
+  # Configures an Ingress resource to route traffic to the API and WebSocket services based on the request path.
+  # Automatically linked to the NGINX Ingress Controller LoadBalancer service.
 }
-
-
-
-# resource "kubernetes_service" "cluster_lb" {
-# depends_on = [aws_acm_certificate_validation.api_cert_validation]
-#   metadata {
-#     name = "ce-lb-service"
-# annotations = {
-# "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
-# "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
-# "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
-# }
-#   }
-#   spec {
-#     selector = {
-#       app = var.api_pod_label
-#     }
-#     port {
-#       name        = "https"
-#       port        = 443
-#       target_port = 8080
-#     }
-#     type = "LoadBalancer"
-#   }
-# }
-
-# data "kubernetes_service" "cluster_lb" {
-#   metadata {
-#     name = kubernetes_service.cluster_lb.metadata[0].name
-#   }
-
-#   depends_on = [
-#     kubernetes_service.cluster_lb
-#   ]
-# }
-
-# resource "kubernetes_ingress_v1" "cluster_ingress" {
-#   metadata {
-#     name = "ce-api-ingress"
-#     annotations = {
-#       "kubernetes.io/ingress.class"                    = "nginx"
-#       "nginx.ingress.kubernetes.io/rewrite-target"     = "/"
-#       "nginx.ingress.kubernetes.io/ssl-redirect"       = "true"
-#       "nginx.ingress.kubernetes.io/enable-cors"        = "true"
-#       "nginx.ingress.kubernetes.io/websocket-services" = "${kubernetes_service.cluster_lb.metadata[0].name}"
-#     }
-#   }
-
-#   spec {
-#     default_backend {
-#       service {
-#         name = kubernetes_service.cluster_lb.metadata[0].name
-#         port {
-#           number = kubernetes_service.cluster_lb.spec[0].port[0].port
-#         }
-#       }
-#     }
-
-#     rule {
-#       host = var.domain_name
-#       http {
-#         path {
-#           path = "/*"
-#           backend {
-#             service {
-#               name = kubernetes_service.cluster_lb.metadata[0].name
-#               port {
-#                 number = kubernetes_service.cluster_lb.spec[0].port[0].port
-#               }
-#             }
-#           }
-#         }
-#       }
-#     }
-
-# tls {
-#   hosts       = [var.domain_name]
-#   secret_name = "api2-chatengine-io-tls"
-# }
-#   }
-# }

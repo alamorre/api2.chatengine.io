@@ -25,6 +25,6 @@ resource "aws_route53_record" "api_record" {
   name       = var.domain_name
   type       = "CNAME"
   ttl        = "300"
-  records    = [data.kubernetes_service.nginx_ingress_lb.status.0.load_balancer.0.ingress.0.hostname]
-  depends_on = [kubernetes_service.nginx_ingress_lb]
+  records    = [data.kubernetes_service.ingress_lb.status.0.load_balancer.0.ingress.0.hostname]
+  depends_on = [kubernetes_service.ingress_lb]
 }

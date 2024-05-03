@@ -75,8 +75,15 @@ resource "helm_release" "nginx_ingress" {
 }
 
 resource "kubernetes_service" "nginx_ingress_lb" {
+  depends_on = [aws_acm_certificate_validation.api_cert_validation]
+
   metadata {
     name = "nginx-ingress-lb"
+    annotations = {
+      "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
+      "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
+      "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
+    }
   }
   spec {
     type = "LoadBalancer"
@@ -85,7 +92,7 @@ resource "kubernetes_service" "nginx_ingress_lb" {
       "app.kubernetes.io/instance" = "nginx-ingress"
     }
     port {
-      port        = 80
+      port        = 443
       target_port = 80
     }
   }
@@ -139,6 +146,11 @@ resource "kubernetes_ingress_v1" "example" {
         }
       }
     }
+
+    tls {
+      hosts       = [var.domain_name]
+      secret_name = "api2-chatengine-io-tls"
+    }
   }
 }
 
@@ -149,9 +161,9 @@ resource "kubernetes_ingress_v1" "example" {
 #   metadata {
 #     name = "ce-lb-service"
 # annotations = {
-#   "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
-#   "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
-#   "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
+# "service.beta.kubernetes.io/aws-load-balancer-backend-protocol" = "http"
+# "service.beta.kubernetes.io/aws-load-balancer-ssl-cert"         = aws_acm_certificate.api_cert.arn
+# "service.beta.kubernetes.io/aws-load-balancer-ssl-ports"        = "443"
 # }
 #   }
 #   spec {
@@ -216,9 +228,9 @@ resource "kubernetes_ingress_v1" "example" {
 #       }
 #     }
 
-#     tls {
-#       hosts       = [var.domain_name]
-#       secret_name = "api2-chatengine-io-tls"
-#     }
+# tls {
+#   hosts       = [var.domain_name]
+#   secret_name = "api2-chatengine-io-tls"
+# }
 #   }
 # }

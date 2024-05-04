@@ -1,8 +1,8 @@
 import uWS from "uWebSockets.js";
-import upgrade from "./middleware/upgrade.js";
-import open from "./middleware/open.js";
-import message from "./middleware/message.js";
-import close from "./middleware/close.js";
+import upgrade from "./middleware/person/upgrade.js";
+import open from "./middleware/person/open.js";
+import message from "./middleware/person/message.js";
+import close from "./middleware/person/close.js";
 
 // Server
 const app = uWS.App();

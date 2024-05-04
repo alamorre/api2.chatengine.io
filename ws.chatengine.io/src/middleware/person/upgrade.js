@@ -1,4 +1,4 @@
-import auth from "../lib/auth.js";
+import auth from "../../lib/auth.js";
 
 export default function upgrade(res, req, context) {
   // Extract headers synchronously

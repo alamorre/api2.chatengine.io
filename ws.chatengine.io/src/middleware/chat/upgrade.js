@@ -24,7 +24,7 @@ export default function upgradeChat(res, req, context) {
       res.cork(() => {
         if (authenticated) {
           res.upgrade(
-            { project, chatID, accessKey }, // Attach properties to ws object if needed
+            { project, chatID, accessKey, pirvateKey }, // Attach properties to ws object if needed
             secWebSocketKey, // Use pre-extracted header
             secWebSocketProtocol, // Use pre-extracted header
             secWebSocketExtensions, // Use pre-extracted header

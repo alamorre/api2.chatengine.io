@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { redis } from "../main.js";
 
-export default async function auth(project, username, secret) {
-  const cacheKey = `auth-${project}-${username}-${secret}`;
+export default async function auth(project, username, secret, pirvateKey) {
+  const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;
 
   // Try to get cached result from Redis
   const cachedResult = await redis.get(cacheKey);
@@ -16,9 +16,10 @@ export default async function auth(project, username, secret) {
     const url = `${process.env.API_URL}/users/me/`;
     const response = await axios.get(url, {
       headers: {
-        "project-id": project,
-        "user-name": username,
-        "user-secret": secret,
+        "project-id": project !== "" && project,
+        "user-name": username !== "" && username,
+        "user-secret": secret !== "" && secret,
+        "private-key": pirvateKey !== "" && pirvateKey,
       },
     });
 

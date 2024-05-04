@@ -1,12 +1,12 @@
 const WebSocket = require("ws");
 
 // Define the WebSocket URL and any desired headers
-const wsUrl = "ws://localhost:9001/person"; // Adjust the URL as needed
+const wsUrl = "ws://localhost:9001/ws/person/"; // Adjust the URL as needed
 const options = {
   headers: {
     "project-id": "c5394dc3-a877-4125-ace1-4baed7a98447",
-    "user-name": "bad_user",
-    "user-secret": "bad_pwd",
+    "user-name": "adam",
+    "user-secret": "pass1234",
   },
 };
 
@@ -15,6 +15,16 @@ const ws = new WebSocket(wsUrl, options);
 
 ws.on("open", function open() {
   console.log("Connection successfully opened");
+  setTimeout(() => {
+    ws.send('{"message":"Hello, world!"}');
+  }, 500);
+  setTimeout(() => {
+    ws.close();
+  }, 500);
+});
+
+ws.on("message", function incoming(data) {
+  console.log("Received:", data.toString("utf8"));
 });
 
 ws.on("close", function close() {
@@ -26,5 +36,6 @@ ws.on("error", function error(err) {
 });
 
 // Output:
-// Connection error: unexpected server response (401)
+// Connection successfully opened
+// Received: {"message":"Hello, world!"}
 // Connection closed

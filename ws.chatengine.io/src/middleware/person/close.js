@@ -1,3 +1,3 @@
-export default function close() {
+export default function closePerson() {
   console.log("WebSocket closed");
 }

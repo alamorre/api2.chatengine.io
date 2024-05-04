@@ -1,6 +1,6 @@
 import auth from "../../lib/auth.js";
 
-export default function upgradePerson(res, req, context) {
+export default function upgrade(res, req, context) {
   // Extract headers synchronously
   const project = req.getHeader("project-id");
   const username = req.getHeader("user-name");

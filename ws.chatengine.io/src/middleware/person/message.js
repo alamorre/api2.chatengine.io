@@ -1,3 +1,3 @@
-export default function message(ws, message, isBinary) {
+export default function messagePerson(ws, message, isBinary) {
   ws.send(message, isBinary);
 }

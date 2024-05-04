@@ -5,6 +5,7 @@ export default function upgradeChat(res, req, context) {
   const project = req.getHeader("project-id");
   const chatID = req.getHeader("chat-id");
   const accessKey = req.getHeader("access-key");
+  const pirvateKey = req.getHeader("private-key");
   const secWebSocketKey = req.getHeader("sec-websocket-key");
   const secWebSocketProtocol = req.getHeader("sec-websocket-protocol");
   const secWebSocketExtensions = req.getHeader("sec-websocket-extensions");
@@ -15,7 +16,7 @@ export default function upgradeChat(res, req, context) {
     res.aborted = true; // You can use a flag to check if the response was aborted
   });
 
-  authChat(project, chatID, accessKey)
+  authChat(project, chatID, accessKey, pirvateKey)
     .then((authenticated) => {
       if (res.aborted) return; // Do not use res if it has been marked as aborted
 

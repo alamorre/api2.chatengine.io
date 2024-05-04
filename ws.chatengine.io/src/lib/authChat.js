@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { redis } from "../main.js";
 
-export default async function authChat(project, chatID, accessKey) {
-  const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}`;
+export default async function authChat(project, chatID, accessKey, pirvateKey) {
+  const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${pirvateKey}`;
 
   // Try to get cached result from Redis
   const cachedResult = await redis.get(cacheKey);
@@ -16,8 +16,9 @@ export default async function authChat(project, chatID, accessKey) {
     const url = `${process.env.API_URL}/chats/${chatID}/`;
     const response = await axios.get(url, {
       headers: {
-        "project-id": project,
-        "access-key": accessKey,
+        "project-id": project !== "" && project,
+        "access-key": accessKey !== "" && accessKey,
+        "private-key": pirvateKey !== "" && pirvateKey,
       },
     });
 

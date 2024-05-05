@@ -1,10 +1,10 @@
 const WebSocket = require("ws");
 
 // Define the WebSocket URL and any desired headers
-const wsUrl = "ws://localhost:9001/person"; // Adjust the URL as needed
+const wsUrl = "ws://localhost:9001/ws/person/"; // Adjust the URL as needed
 const options = {
   headers: {
-    "project-id": "c5394dc3-a877-4125-ace1-4baed7a98447",
+    "private-key": "6d3b85b2-000a-427f-86e0-76c41f6cd5ec",
     "user-name": "adam",
     "user-secret": "pass1234",
   },

@@ -1,39 +1,39 @@
-variable "api_pod_name" {
-  description = "The name of the api pod"
+variable "ws_pod_name" {
+  description = "The name of the ws pod"
   type        = string
-  default     = "ce-api"
+  default     = "ce-ws"
 }
 
-variable "api_pod_label" {
-  description = "The label to apply to api pods"
+variable "ws_pod_label" {
+  description = "The label to apply to ws pods"
   type        = string
-  default     = "ce-api"
+  default     = "ce-ws"
 }
 
-resource "kubernetes_deployment" "api_deployment" {
+resource "kubernetes_deployment" "ws_deployment" {
   metadata {
-    name = var.api_pod_name
+    name = var.ws_pod_name
     labels = {
-      app = var.api_pod_label
+      app = var.ws_pod_label
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        app = var.api_pod_label
+        app = var.ws_pod_label
       }
     }
     template {
       metadata {
         labels = {
-          app = var.api_pod_label
+          app = var.ws_pod_label
         }
       }
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag_api}"
-          name  = var.api_pod_name
+          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/wschatengine:${var.image_tag_ws}"
+          name  = var.ws_pod_name
           env_from {
             secret_ref {
               name = kubernetes_secret.app_secret.metadata[0].name
@@ -66,10 +66,9 @@ resource "kubernetes_deployment" "api_deployment" {
   }
 }
 
-
-resource "kubernetes_horizontal_pod_autoscaler" "api_hpa" {
+resource "kubernetes_horizontal_pod_autoscaler" "ws_hpa" {
   metadata {
-    name      = "ce-api-hpa"
+    name      = "ce-ws-hpa"
     namespace = "default"
   }
 
@@ -80,24 +79,26 @@ resource "kubernetes_horizontal_pod_autoscaler" "api_hpa" {
     scale_target_ref {
       api_version = "apps/v1"
       kind        = "Deployment"
-      name        = kubernetes_deployment.api_deployment.metadata[0].name
+      name        = kubernetes_deployment.ws_deployment.metadata[0].name
     }
   }
 }
 
-resource "kubernetes_service" "api_service" {
+
+
+resource "kubernetes_service" "ws_service" {
   metadata {
-    name = "ce-api-service"
+    name = "ce-ws-service"
   }
   spec {
     selector = {
-      app = var.api_pod_label
+      app = var.ws_pod_label
     }
     type = "ClusterIP"
     port {
       name        = "https"
       port        = 8000
-      target_port = 8080
+      target_port = 9001
     }
   }
 }

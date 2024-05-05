@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { redis } from "../main.js";
 
-export default async function auth(project, username, secret, pirvateKey) {
-  const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;
+export default async function authChat(project, chatID, accessKey, pirvateKey) {
+  const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${pirvateKey}`;
 
   // Try to get cached result from Redis
   const cachedResult = await redis.get(cacheKey);
@@ -13,12 +13,11 @@ export default async function auth(project, username, secret, pirvateKey) {
   }
 
   try {
-    const url = `${process.env.API_URL}/users/me/`;
+    const url = `${process.env.API_URL}/chats/${chatID}/`;
     const response = await axios.get(url, {
       headers: {
         "project-id": project !== "" && project,
-        "user-name": username !== "" && username,
-        "user-secret": secret !== "" && secret,
+        "access-key": accessKey !== "" && accessKey,
         "private-key": pirvateKey !== "" && pirvateKey,
       },
     });
@@ -28,7 +27,7 @@ export default async function auth(project, username, secret, pirvateKey) {
     await redis.set(cacheKey, isSuccess.toString(), "EX", 900);
     return isSuccess;
   } catch (e) {
-    console.log("Auth failed", e.response && e.response.status);
+    console.log("Auth chat failed", e.response && e.response.status);
     await redis.set(cacheKey, "false", "EX", 900);
     return false;
   }

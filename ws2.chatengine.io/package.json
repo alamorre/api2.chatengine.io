@@ -1,0 +1,23 @@
+{
+  "name": "ws2.chatengine.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist/*",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm src/index.ts'",
+    "prebuild": "npm run clean",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Adam La Morre",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

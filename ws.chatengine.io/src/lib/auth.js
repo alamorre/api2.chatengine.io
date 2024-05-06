@@ -26,9 +26,9 @@ export default async function auth(project, username, secret, pirvateKey) {
     const isSuccess = response.status === 200;
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
     await redis.set(cacheKey, isSuccess.toString(), "EX", 900);
-    return isSuccess;
+    return response;
   } catch (e) {
-    console.log("Auth failed", e.response && e.response.status);
+    console.log("Auth failed", e);
     await redis.set(cacheKey, "false", "EX", 900);
     return false;
   }

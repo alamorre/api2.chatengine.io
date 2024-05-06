@@ -17,14 +17,14 @@ export default function upgradePerson(res, req, context) {
   });
 
   auth(project, username, secret, pirvateKey)
-    .then((authenticated) => {
+    .then((response) => {
       if (res.aborted) return; // Do not use res if it has been marked as aborted
-
+      console.log("response", response);
       // Use cork to buffer writes
       res.cork(() => {
-        if (authenticated) {
+        if (response.status === 200) {
           res.upgrade(
-            { project, username, secret, pirvateKey }, // Attach properties to ws object if needed
+            { project, username, secret, pirvateKey, id: response.data.id },
             secWebSocketKey, // Use pre-extracted header
             secWebSocketProtocol, // Use pre-extracted header
             secWebSocketExtensions, // Use pre-extracted header

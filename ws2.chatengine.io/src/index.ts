@@ -1,5 +1,11 @@
-const run = () => {
-  console.log("ChatEngine is running");
-};
+import { app } from "./server.js";
 
-run();
+const port = 9001;
+
+app.listen(port, (listenToken) => {
+  if (listenToken) {
+    console.log(`WebSocket listening on port ${port}`);
+  } else {
+    console.log(`Failed to listen on port ${port}`);
+  }
+});

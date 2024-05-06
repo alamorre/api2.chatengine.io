@@ -10,6 +10,10 @@ import openChat from "./middleware/chat/open.js";
 import messageChat from "./middleware/chat/message.js";
 import closeChat from "./middleware/chat/close.js";
 
+import dotenv from "dotenv";
+
+dotenv.config();
+
 // Server
 const app = uWS.App();
 

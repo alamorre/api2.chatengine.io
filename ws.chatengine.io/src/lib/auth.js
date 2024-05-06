@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { redis } from "../main.js";
+import { redis } from "./redis.js";
 
 export default async function auth(project, username, secret, pirvateKey) {
   const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;

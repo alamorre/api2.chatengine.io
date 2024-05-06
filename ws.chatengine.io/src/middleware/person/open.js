@@ -1,4 +1,4 @@
-import { redis } from "../../main.js";
+import { redis } from "../../lib/redis.js";
 
 export default function openPerson(ws) {
   const channel = `person:${ws.id}`;

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { redis } from "../main.js";
+import { redis } from "../lib/redis.js";
 
 export default async function authChat(project, chatID, accessKey, pirvateKey) {
   const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${pirvateKey}`;

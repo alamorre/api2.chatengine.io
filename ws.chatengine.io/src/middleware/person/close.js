@@ -1,4 +1,4 @@
-import { redis } from "../../main.js";
+import { redis } from "../../lib/redis.js";
 
 export default function closePerson(ws) {
   const channel = `person:${ws.id}`;

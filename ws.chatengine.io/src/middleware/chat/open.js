@@ -1,3 +1,5 @@
 export default function open(ws) {
-  console.log("Custom Header in open:", ws.project);
+  const channel = `chat:${ws.chatID}`;
+  console.log(`Open channel: ${channel}`);
+  ws.subscribe(channel); // Picks up app.publish(channel, message)
 }

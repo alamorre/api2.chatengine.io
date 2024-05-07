@@ -1,3 +1,4 @@
 export default function close() {
-  console.log("WebSocket closed");
+  const channel = `chat:${ws.chatID}`;
+  console.log(`Close channel: ${channel}`);
 }

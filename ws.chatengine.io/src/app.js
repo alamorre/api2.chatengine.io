@@ -10,7 +10,7 @@ import openChat from "./middleware/chat/open.js";
 import messageChat from "./middleware/chat/message.js";
 import closeChat from "./middleware/chat/close.js";
 
-import { redis } from "./lib/redis.js";
+import { redisSubscriber } from "./lib/redis.js";
 
 import dotenv from "dotenv";
 
@@ -51,7 +51,9 @@ app.any("/*", (res) => {
   res.end("Nothing to see here!");
 });
 
-redis.on("message", (channel, message) => {
+redisSubscriber.psubscribe("person:*", "chat:*");
+
+redisSubscriber.on("pmessage", (_, channel, message) => {
   console.log(`Publishing message to ${channel}: ${message}`);
   app.publish(channel, message);
 });

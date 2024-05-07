@@ -17,14 +17,14 @@ export default function upgradeChat(res, req, context) {
   });
 
   authChat(project, chatID, accessKey, pirvateKey)
-    .then((authenticated) => {
+    .then((response) => {
       if (res.aborted) return; // Do not use res if it has been marked as aborted
 
       // Use cork to buffer writes
       res.cork(() => {
-        if (authenticated) {
+        if (response.success) {
           res.upgrade(
-            { project, chatID, accessKey, pirvateKey }, // Attach properties to ws object if needed
+            { project, chatID, accessKey, pirvateKey, id: response.id }, // Attach properties to ws object if needed
             secWebSocketKey, // Use pre-extracted header
             secWebSocketProtocol, // Use pre-extracted header
             secWebSocketExtensions, // Use pre-extracted header

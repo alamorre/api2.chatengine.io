@@ -1,12 +1,12 @@
 import axios from "axios";
 
-import { redis } from "./redis.js";
+import { redisCache } from "./redis.js";
 
 export default async function auth(project, username, secret, pirvateKey) {
   const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;
 
   // Try to get cached result from Redis
-  const cachedResult = await redis.get(cacheKey);
+  const cachedResult = await redisCache.get(cacheKey);
   if (cachedResult !== null) {
     console.log(`Returning cached result: ${cachedResult}`);
     return { success: cachedResult != "-1", id: cachedResult }; // Redis stores data as strings
@@ -24,11 +24,11 @@ export default async function auth(project, username, secret, pirvateKey) {
     });
     const id = response.data.id.toString();
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
-    await redis.set(cacheKey, id, "EX", 900);
+    await redisCache.set(cacheKey, id, "EX", 900);
     return { success: true, id };
   } catch (error) {
     console.log("Auth failed", error);
-    await redis.set(cacheKey, "-1", "EX", 900);
+    await redisCache.set(cacheKey, "-1", "EX", 900);
     return { success: false, error };
   }
 }

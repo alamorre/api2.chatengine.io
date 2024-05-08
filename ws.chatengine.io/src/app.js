@@ -54,7 +54,7 @@ app.any("/*", (res) => {
 redisSubscriber.psubscribe("person:*", "chat:*");
 
 redisSubscriber.on("pmessage", (_, channel, message) => {
-  console.log(`Publishing message to ${channel}: ${message}`);
+  console.log(`Publishing message to ${channel}`);
   app.publish(channel, message);
 });
 

@@ -1,7 +1,0 @@
-node_modules
-npm-debug.log
-
-# Jest tests
-jest.config.js
-jest.setup.js
-**/*.test.js

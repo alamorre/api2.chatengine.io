@@ -27,12 +27,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: ws2.chatengine.io/package-lock.json
+          cache-dependency-path: ws.chatengine.io/package-lock.json
 
       - name: Install dependencies
         run: npm install
-        working-directory: ws2.chatengine.io/
+        working-directory: ws.chatengine.io/
 
       - name: Run Jest tests
         run: npm test
-        working-directory: ws2.chatengine.io/
+        working-directory: ws.chatengine.io/

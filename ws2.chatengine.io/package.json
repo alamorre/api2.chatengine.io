@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "Adam La Morre",
@@ -13,6 +13,13 @@
   "devDependencies": {
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "ws": "^8.17.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.43.0"
   }
 }

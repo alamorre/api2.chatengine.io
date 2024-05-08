@@ -403,6 +403,7 @@ class ChatDetailsWeb(APIView):
         serializer = ChatSerializer(chat, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(admin=admin)
+            chat_publisher.publish_chat_data('edit_chat', serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

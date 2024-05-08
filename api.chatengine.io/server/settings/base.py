@@ -177,3 +177,4 @@ stripe.api_key = os.getenv('STRIPE_KEY')
 # Redis for caching
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+REDIS_DB = os.getenv('REDIS_DB', 1) # 1 for pub/sub

@@ -14,6 +14,7 @@ from accounts.models import User
 
 from chats.models import Chat, ChatPerson, Message
 from chats.serializers import ChatSerializer
+from chats.publishers import chat_publisher
 
 from users.emailer import emailer
 
@@ -431,8 +432,7 @@ class ChatDetailsWeb(APIView):
 
         # Publish and return new data
         serializer = ChatSerializer(chat, many=False)
-        # todo: Implement this
-        # chat_publisher.publish_chat_data('edit_chat', serializer.data)
+        chat_publisher.publish_chat_data('edit_chat', serializer.data)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 

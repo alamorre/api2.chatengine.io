@@ -13,12 +13,12 @@ from projects.authentication import PrivateKeyAuthentication
 
 from chats.models import ChatPerson
 from chats.serializers import ChatSerializer
+from chats.publishers import chat_publisher
 
 from users.models import Session
 from users.serializers import SessionSerializer
 
 from .authentication import UserSecretAuthentication
-# from .publishers import chat_publisher
 from .emailer import emailer
 
 class MyDetails(APIView):
@@ -36,8 +36,7 @@ class MyDetails(APIView):
             serializer.save()
             for chat_person in ChatPerson.objects.filter(person=request.user):
                 chat_data = ChatSerializer(chat_person.chat, many=False).data
-                # todo: Implement this
-                # chat_publisher.publish_chat_data('edit_chat', chat_data)
+                chat_publisher.publish_chat_data('edit_chat', chat_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

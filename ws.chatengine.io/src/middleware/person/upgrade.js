@@ -39,7 +39,7 @@ export default function upgradePerson(res, req, context) {
 
       // Use cork to buffer writes
       res.cork(() => {
-        console.error("Authentication failed with error:", e);
+        console.log("Authentication failed with error:", e);
         res.writeStatus("500 Internal Server Error").end();
       });
     });

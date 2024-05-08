@@ -40,7 +40,7 @@ export default function upgradeChat(res, req, context) {
 
       // Use cork to buffer writes
       res.cork(() => {
-        console.error("Authentication chat failed with error:", e);
+        console.log("Authentication chat failed with error:", e);
         res.writeStatus("500 Internal Server Error").end();
       });
     });

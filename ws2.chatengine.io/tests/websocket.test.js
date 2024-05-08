@@ -49,7 +49,7 @@ describe("WebSocket Person Tests", () => {
 
     client.onopen = () => {
       expect(axios.get).toHaveBeenCalledWith(
-        "http://127.0.0.1:8000/users/me/",
+        `${process.env.API_URL}/users/me/`,
         { ...options, headers: { ...options.headers, "private-key": false } }
       );
 
@@ -115,7 +115,7 @@ describe("WebSocket Person Tests", () => {
     client.onerror = (event) => {
       expect(event.message).toBe("Unexpected server response: 401");
       expect(axios.get).toHaveBeenCalledWith(
-        "http://127.0.0.1:8000/users/me/",
+        `${process.env.API_URL}/users/me/`,
         { ...options, headers: { ...options.headers, "private-key": false } }
       );
       client.close();

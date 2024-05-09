@@ -1,3 +1,4 @@
-export default function closePerson() {
-  console.log("WebSocket closed");
+export default function closePerson(ws) {
+  const channel = `person:${ws.id}`;
+  console.log(`Close channel: ${channel}`);
 }

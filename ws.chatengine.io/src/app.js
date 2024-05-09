@@ -10,6 +10,12 @@ import openChat from "./middleware/chat/open.js";
 import messageChat from "./middleware/chat/message.js";
 import closeChat from "./middleware/chat/close.js";
 
+import { redisSubscriber } from "./lib/redis.js";
+
+import dotenv from "dotenv";
+
+dotenv.config();
+
 // Server
 const app = uWS.App();
 
@@ -43,6 +49,13 @@ app.get("/ws/health/", (res, req) => {
 // Default handler for any other request
 app.any("/*", (res) => {
   res.end("Nothing to see here!");
+});
+
+redisSubscriber.psubscribe("person:*", "chat:*");
+
+redisSubscriber.on("pmessage", (_, channel, message) => {
+  console.log(`Publishing message to ${channel}`);
+  app.publish(channel, message);
 });
 
 export default app;

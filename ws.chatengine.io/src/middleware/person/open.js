@@ -1,3 +1,5 @@
 export default function openPerson(ws) {
-  console.log("Custom Header in open:", ws.project);
+  const channel = `person:${ws.id}`;
+  console.log(`Open channel: ${channel}`);
+  ws.subscribe(channel); // Picks up app.publish(channel, message)
 }

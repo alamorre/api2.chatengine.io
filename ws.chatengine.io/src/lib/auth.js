@@ -1,15 +1,15 @@
 import axios from "axios";
 
-import { redis } from "../main.js";
+import { redisCache } from "./redis.js";
 
 export default async function auth(project, username, secret, pirvateKey) {
   const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;
 
   // Try to get cached result from Redis
-  const cachedResult = await redis.get(cacheKey);
+  const cachedResult = await redisCache.get(cacheKey);
   if (cachedResult !== null) {
     console.log(`Returning cached result: ${cachedResult}`);
-    return cachedResult === "true"; // Redis stores data as strings
+    return { success: cachedResult != "-1", id: cachedResult }; // Redis stores data as strings
   }
 
   try {
@@ -22,14 +22,13 @@ export default async function auth(project, username, secret, pirvateKey) {
         "private-key": pirvateKey !== "" && pirvateKey,
       },
     });
-
-    const isSuccess = response.status === 200;
+    const id = response.data.id.toString();
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
-    await redis.set(cacheKey, isSuccess.toString(), "EX", 900);
-    return isSuccess;
-  } catch (e) {
-    console.log("Auth failed", e.response && e.response.status);
-    await redis.set(cacheKey, "false", "EX", 900);
-    return false;
+    await redisCache.set(cacheKey, id, "EX", 900);
+    return { success: true, id };
+  } catch (error) {
+    console.log("Auth failed", error);
+    await redisCache.set(cacheKey, "-1", "EX", 900);
+    return { success: false, error };
   }
 }

@@ -17,6 +17,7 @@ from users.authentication import UserSecretAuthentication
 from projects.models import Person
 from projects.serializers import PersonPublicSerializer
 
+from .publishers import chat_publisher
 from .notifiers import Emailer
 from .authentication import ChatAccessKeyAuthentication
 from .models import Chat, ChatPerson, Message, Attachment
@@ -50,8 +51,7 @@ class Chats(APIView):
         serializer = ChatSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(project=request.auth, admin=request.user)
-            #  todo: Implement this
-            # chat_publisher.publish_chat_data('new_chat', serializer.data)
+            chat_publisher.publish_chat_data('new_chat', serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,8 +88,7 @@ class Chats(APIView):
             if serializer.is_valid():
                 serializer.save()
 
-            # todo: Implement this
-            # chat_publisher.publish_chat_data('new_chat', serializer.data)
+            chat_publisher.publish_chat_data('new_chat', serializer.data)
             return Response(ChatSerializer(chat, many=False).data, status.HTTP_201_CREATED)
 
         return Response(ChatSerializer(chat, many=False).data, status.HTTP_200_OK)
@@ -135,7 +134,7 @@ class ChatDetails(APIView):
         serializer = ChatSerializer(chat, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            # chat_publisher.publish_chat_data('edit_chat', serializer.data)
+            chat_publisher.publish_chat_data('edit_chat', serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,7 +144,7 @@ class ChatDetails(APIView):
         chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
         get_object_or_404(ChatPerson, chat=chat, person=request.user)
         chat_json = ChatSerializer(chat, many=False).data
-        # chat_publisher.publish_chat_data('delete_chat', chat_json)
+        chat_publisher.publish_chat_data('delete_chat', chat_json)
         chat.delete()  # Delete after publish!
         return Response(chat_json, status=status.HTTP_200_OK)
 
@@ -159,7 +158,7 @@ class ChatTyping(APIView):
         chat = get_object_or_404(Chat, pk=chat_id, project=request.auth)
         get_object_or_404(ChatPerson, chat=chat, person=request.user)
         typing_data = {'id': chat.pk, 'person': request.user.username}
-        # chat_publisher.publish_chat_data('is_typing', typing_data)
+        chat_publisher.publish_chat_data('is_typing', typing_data)
         return Response(typing_data, status=status.HTTP_200_OK)
 
 
@@ -182,11 +181,11 @@ class ChatPersonList(APIView):
 
         chat_person, created = ChatPerson.objects.get_or_create(chat=chat, person=person)
 
-        # serializer = ChatSerializer(chat, many=False)
-        # chat_publisher.publish_chat_data('add_person', serializer.data)
+        serializer = ChatSerializer(chat, many=False)
+        chat_publisher.publish_chat_data('add_person', serializer.data)
 
-        # if created:
-            # chat_publisher.publish_chat_data('new_chat', serializer.data, [person.pk])
+        if created:
+            chat_publisher.publish_chat_data('new_chat', serializer.data, [person.pk])
 
         serializer = ChatPersonSerializer(chat_person, many=False)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -201,7 +200,7 @@ class ChatPersonList(APIView):
             serializer.save()
             if last_read is not chat_person.last_read:
                 chat_serializer = ChatSerializer(chat, many=False)
-                # chat_publisher.publish_chat_data('edit_chat', chat_serializer.data)
+                chat_publisher.publish_chat_data('edit_chat', chat_serializer.data)
             return Response(chat_serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -212,8 +211,8 @@ class ChatPersonList(APIView):
         chat_person_json = ChatPersonSerializer(chat_person, many=False).data
         chat_person.delete()  # Delete before Socket publish!
         serializer = ChatSerializer(chat, many=False)
-        # chat_publisher.publish_chat_data('remove_person', serializer.data)
-        # chat_publisher.publish_chat_data('delete_chat', serializer.data, [person.pk])
+        chat_publisher.publish_chat_data('remove_person', serializer.data)
+        chat_publisher.publish_chat_data('delete_chat', serializer.data, [person.pk])
         return Response(chat_person_json, status=status.HTTP_200_OK)
 
     def delete(self, request, chat_id):
@@ -222,8 +221,8 @@ class ChatPersonList(APIView):
         chat_person_json = ChatPersonSerializer(chat_person, many=False).data
         chat_person.delete()  # Delete before Socket publish!
         serializer = ChatSerializer(chat, many=False)
-        # chat_publisher.publish_chat_data('remove_person', serializer.data)
-        # chat_publisher.publish_chat_data('delete_chat', serializer.data, [request.user.pk])
+        chat_publisher.publish_chat_data('remove_person', serializer.data)
+        chat_publisher.publish_chat_data('delete_chat', serializer.data, [request.user.pk])
         return Response(chat_person_json, status=status.HTTP_200_OK)
 
 
@@ -329,8 +328,8 @@ class Messages(APIView):
             chat_serializer = ChatSerializer(chat, many=False)
 
             # Publish new data (Socket + Hooks + Emails)
-            # chat_publisher.publish_chat_data('edit_chat', chat_serializer.data, people_ids=people_ids)
-            # chat_publisher.publish_message_data('new_message', chat, serializer.data, people_ids=people_ids)
+            chat_publisher.publish_chat_data('edit_chat', chat_serializer.data, people_ids=people_ids)
+            chat_publisher.publish_message_data('new_message', chat, serializer.data, people_ids=people_ids)
             emailer = Emailer()
             emailer.email_chat_members(project=request.auth, message=message, people=people)
 
@@ -381,7 +380,7 @@ class MessageDetails(APIView):
         serializer = MessageSerializer(message, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            # chat_publisher.publish_message_data('edit_message', chat, serializer.data)
+            chat_publisher.publish_message_data('edit_message', chat, serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -393,6 +392,6 @@ class MessageDetails(APIView):
             message = get_object_or_404(Message, chat=chat, id=message_id, sender=request.user)
 
         message_json = MessageSerializer(message, many=False).data
-        # chat_publisher.publish_message_data('delete_message', chat, message_json)
+        chat_publisher.publish_message_data('delete_message', chat, message_json)
         message.delete()  # Delete after publish!
         return Response(message_json, status=status.HTTP_200_OK)

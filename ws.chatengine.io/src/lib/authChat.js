@@ -1,15 +1,15 @@
 import axios from "axios";
 
-import { redis } from "../main.js";
+import { redisCache } from "../lib/redis.js";
 
 export default async function authChat(project, chatID, accessKey, pirvateKey) {
   const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${pirvateKey}`;
 
   // Try to get cached result from Redis
-  const cachedResult = await redis.get(cacheKey);
+  const cachedResult = await redisCache.get(cacheKey);
   if (cachedResult !== null) {
     console.log(`Returning cached result: ${cachedResult}`);
-    return cachedResult === "true"; // Redis stores data as strings
+    return { success: cachedResult != "-1", id: cachedResult };
   }
 
   try {
@@ -22,13 +22,13 @@ export default async function authChat(project, chatID, accessKey, pirvateKey) {
       },
     });
 
-    const isSuccess = response.status === 200;
+    const id = response.data.id.toString();
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
-    await redis.set(cacheKey, isSuccess.toString(), "EX", 900);
-    return isSuccess;
-  } catch (e) {
-    console.log("Auth chat failed", e.response && e.response.status);
-    await redis.set(cacheKey, "false", "EX", 900);
-    return false;
+    await redisCache.set(cacheKey, id, "EX", 900);
+    return { success: true, id };
+  } catch (error) {
+    console.log("Chat auth failed", error);
+    await redisCache.set(cacheKey, "-1", "EX", 900);
+    return { success: false, error };
   }
 }

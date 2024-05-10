@@ -8,7 +8,7 @@ import { redisCache, redisSubscriber } from "../src/lib/redis.js";
 describe("WebSocket Person Tests", () => {
   let token;
   let client;
-  const wsUrl = "ws://localhost:9001/ws/person/";
+  const wsUrl = "ws://localhost:9001/person/";
   const projectId = "c5394dc3-a877-4125-ace1-4baed7a98447";
   const privateKey = "6d3b85b2-000a-427f-86e0-76c41f6cd5ec";
   const username = "adam";

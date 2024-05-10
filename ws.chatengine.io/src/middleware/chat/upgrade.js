@@ -1,11 +1,24 @@
 import authChat from "../../lib/authChat.js";
 
+function getQueryParam(queryParameters, param) {
+  const value = queryParameters.get(param);
+  return value === null ? undefined : value;
+}
+
 export default function upgradeChat(res, req, context) {
+  const query = req.getQuery();
+  const queryParameters = new URLSearchParams(query);
+  let project = getQueryParam(queryParameters, "project-id");
+  let chatID = getQueryParam(queryParameters, "chat-id");
+  let accessKey = getQueryParam(queryParameters, "access-key");
+  let privateKey = getQueryParam(queryParameters, "private-key");
+
+  console.log("project", project);
+  console.log("chatID", chatID);
+  console.log("accessKey", accessKey);
+  console.log("privateKey", privateKey);
+
   // Extract headers synchronously
-  const project = req.getHeader("project-id");
-  const chatID = req.getHeader("chat-id");
-  const accessKey = req.getHeader("access-key");
-  const pirvateKey = req.getHeader("private-key");
   const secWebSocketKey = req.getHeader("sec-websocket-key");
   const secWebSocketProtocol = req.getHeader("sec-websocket-protocol");
   const secWebSocketExtensions = req.getHeader("sec-websocket-extensions");
@@ -16,7 +29,7 @@ export default function upgradeChat(res, req, context) {
     res.aborted = true; // You can use a flag to check if the response was aborted
   });
 
-  authChat(project, chatID, accessKey, pirvateKey)
+  authChat(project, chatID, accessKey, privateKey)
     .then((response) => {
       if (res.aborted) return; // Do not use res if it has been marked as aborted
 
@@ -24,7 +37,7 @@ export default function upgradeChat(res, req, context) {
       res.cork(() => {
         if (response.success) {
           res.upgrade(
-            { project, chatID, accessKey, pirvateKey, id: response.id }, // Attach properties to ws object if needed
+            { project, chatID, accessKey, privateKey, id: response.id }, // Attach properties to ws object if needed
             secWebSocketKey, // Use pre-extracted header
             secWebSocketProtocol, // Use pre-extracted header
             secWebSocketExtensions, // Use pre-extracted header

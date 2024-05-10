@@ -9,10 +9,10 @@ export default function upgradeChat(res, req, context) {
   // Extract query parameters synchronously
   const query = req.getQuery();
   const queryParameters = new URLSearchParams(query);
-  const project = getQueryParam(queryParameters, "project-id");
-  const chatID = getQueryParam(queryParameters, "chat-id");
-  const accessKey = getQueryParam(queryParameters, "access-key");
-  const privateKey = getQueryParam(queryParameters, "private-key");
+  const project = getQueryParam(queryParameters, "projectID");
+  const chatID = getQueryParam(queryParameters, "chatID");
+  const accessKey = getQueryParam(queryParameters, "accessKey");
+  const privateKey = getQueryParam(queryParameters, "privateKey");
 
   // Extract headers synchronously
   const secWebSocketKey = req.getHeader("sec-websocket-key");

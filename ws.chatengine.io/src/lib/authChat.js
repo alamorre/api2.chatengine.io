@@ -8,7 +8,7 @@ export default async function authChat(project, chatID, accessKey, pirvateKey) {
   // Try to get cached result from Redis
   const cachedResult = await redisCache.get(cacheKey);
   if (cachedResult !== null) {
-    console.log(`Returning cached result: ${cachedResult}`);
+    console.log(`Returning cached result: ${cacheKey}=${cachedResult}`);
     return { success: cachedResult != "-1", id: cachedResult };
   }
 

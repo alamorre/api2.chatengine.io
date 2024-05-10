@@ -2,7 +2,7 @@ import auth from "../../lib/auth.js";
 
 function getQueryParam(queryParameters, param) {
   const value = queryParameters.get(param);
-  return value === null ? undefined : value;
+  return value === null ? false : value;
 }
 
 export default function upgradePerson(res, req, context) {

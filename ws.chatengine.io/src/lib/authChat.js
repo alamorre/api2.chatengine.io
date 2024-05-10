@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { redisCache } from "../lib/redis.js";
 
-export default async function authChat(project, chatID, accessKey, pirvateKey) {
-  const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${pirvateKey}`;
+export default async function authChat(project, chatID, accessKey, privateKey) {
+  const cacheKey = `chat-auth-${project}-${chatID}-${accessKey}-${privateKey}`;
 
   // Try to get cached result from Redis
   const cachedResult = await redisCache.get(cacheKey);
@@ -18,7 +18,7 @@ export default async function authChat(project, chatID, accessKey, pirvateKey) {
       headers: {
         "project-id": project !== "" && project,
         "access-key": accessKey !== "" && accessKey,
-        "private-key": pirvateKey !== "" && pirvateKey,
+        "private-key": privateKey !== "" && privateKey,
       },
     });
 

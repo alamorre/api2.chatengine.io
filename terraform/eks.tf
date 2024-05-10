@@ -134,7 +134,31 @@ resource "kubernetes_ingress_v1" "ingress_policy" {
     rule {
       http {
         path {
-          path      = "/ws(/|$)(.*)"
+          path      = "/ws/*"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "ce-ws-service"
+              port {
+                number = kubernetes_service.ws_service.spec[0].port[0].port
+              }
+            }
+          }
+        }
+        path {
+          path      = "/person/*"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "ce-ws-service"
+              port {
+                number = kubernetes_service.ws_service.spec[0].port[0].port
+              }
+            }
+          }
+        }
+        path {
+          path      = "/chat/*"
           path_type = "Prefix"
           backend {
             service {

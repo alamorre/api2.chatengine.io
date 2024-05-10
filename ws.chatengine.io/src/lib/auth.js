@@ -2,8 +2,8 @@ import axios from "axios";
 
 import { redisCache } from "./redis.js";
 
-export default async function auth(project, username, secret, pirvateKey) {
-  const cacheKey = `auth-${project}-${username}-${secret}-${pirvateKey}`;
+export default async function auth(project, username, secret, privateKey) {
+  const cacheKey = `auth-${project}-${username}-${secret}-${privateKey}`;
 
   // Try to get cached result from Redis
   const cachedResult = await redisCache.get(cacheKey);
@@ -19,7 +19,7 @@ export default async function auth(project, username, secret, pirvateKey) {
         "project-id": project !== "" && project,
         "user-name": username !== "" && username,
         "user-secret": secret !== "" && secret,
-        "private-key": pirvateKey !== "" && pirvateKey,
+        "private-key": privateKey !== "" && privateKey,
       },
     });
     const id = response.data.id.toString();

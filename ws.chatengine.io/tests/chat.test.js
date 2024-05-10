@@ -8,7 +8,7 @@ import { redisCache, redisSubscriber } from "../src/lib/redis.js";
 describe("WebSocket Chat Tests", () => {
   let token;
   let client;
-  const wsUrl = "ws://localhost:9001/ws/chat/";
+  const wsUrl = "ws://localhost:9001/chat/";
   const projectId = "c5394dc3-a877-4125-ace1-4baed7a98447";
   const privateKey = "6d3b85b2-000a-427f-86e0-76c41f6cd5ec";
   const chatID = "1";
@@ -37,6 +37,9 @@ describe("WebSocket Chat Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
+    const url = `${wsUrl}?project-id=${projectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    client = new WebSocket(url);
+
     const options = {
       headers: {
         "project-id": projectId,
@@ -44,8 +47,6 @@ describe("WebSocket Chat Tests", () => {
         "access-key": accessKey,
       },
     };
-
-    client = new WebSocket(wsUrl, options);
 
     client.onopen = () => {
       expect(axios.get).toHaveBeenCalledWith(
@@ -77,15 +78,8 @@ describe("WebSocket Chat Tests", () => {
     const cacheKey = `chat-auth-${projectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
-    const options = {
-      headers: {
-        "project-id": projectId,
-        "chat-id": chatID,
-        "access-key": accessKey,
-      },
-    };
-
-    client = new WebSocket(wsUrl, options);
+    const url = `${wsUrl}?project-id=${projectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    client = new WebSocket(url);
 
     client.onopen = () => {
       expect(axios.get).not.toHaveBeenCalled();
@@ -108,6 +102,9 @@ describe("WebSocket Chat Tests", () => {
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const url = `${wsUrl}?project-id=${badProjectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    client = new WebSocket(url);
+
     const options = {
       headers: {
         "project-id": badProjectId,
@@ -115,8 +112,6 @@ describe("WebSocket Chat Tests", () => {
         "access-key": accessKey,
       },
     };
-
-    client = new WebSocket(wsUrl, options);
 
     client.onerror = (event) => {
       expect(event.message).toBe("Unexpected server response: 401");
@@ -144,15 +139,8 @@ describe("WebSocket Chat Tests", () => {
     const cacheKey = `chat-auth-${badProjectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, "-1", "EX", 900);
 
-    const options = {
-      headers: {
-        "project-id": badProjectId,
-        "chat-id": chatID,
-        "access-key": accessKey,
-      },
-    };
-
-    client = new WebSocket(wsUrl, options);
+    const url = `${wsUrl}?project-id=${badProjectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    client = new WebSocket(url);
 
     client.onerror = (event) => {
       expect(axios.get).not.toHaveBeenCalled();
@@ -170,14 +158,15 @@ describe("WebSocket Chat Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
+    const url = `${wsUrl}?private-key=${privateKey}&chat-id=${chatID}`;
+    client = new WebSocket(url);
+
     const options = {
       headers: {
         "private-key": privateKey,
         "chat-id": chatID,
       },
     };
-
-    client = new WebSocket(wsUrl, options);
 
     client.onopen = () => {
       expect(axios.get).toHaveBeenCalledWith(

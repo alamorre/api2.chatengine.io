@@ -9,10 +9,10 @@ export default function upgradePerson(res, req, context) {
   // Extract query parameters synchronously
   const query = req.getQuery();
   const queryParameters = new URLSearchParams(query);
-  const project = getQueryParam(queryParameters, "project-id");
-  const username = getQueryParam(queryParameters, "user-name");
-  const secret = getQueryParam(queryParameters, "user-secret");
-  const privateKey = getQueryParam(queryParameters, "private-key");
+  const project = getQueryParam(queryParameters, "projectID");
+  const username = getQueryParam(queryParameters, "username");
+  const secret = getQueryParam(queryParameters, "secret");
+  const privateKey = getQueryParam(queryParameters, "privateKey");
 
   const secWebSocketKey = req.getHeader("sec-websocket-key");
   const secWebSocketProtocol = req.getHeader("sec-websocket-protocol");

@@ -37,7 +37,7 @@ describe("WebSocket Person Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?project-id=${projectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {
@@ -72,7 +72,7 @@ describe("WebSocket Person Tests", () => {
     const cacheKey = `auth-${projectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
-    const url = `${wsUrl}?project-id=${projectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     client.onopen = () => {
@@ -96,7 +96,7 @@ describe("WebSocket Person Tests", () => {
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-    const url = `${wsUrl}?project-id=${badProjectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {
@@ -127,7 +127,7 @@ describe("WebSocket Person Tests", () => {
     const cacheKey = `auth-${badProjectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, "-1", "EX", 900);
 
-    const url = `${wsUrl}?project-id=${badProjectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     client.onerror = (event) => {
@@ -146,7 +146,7 @@ describe("WebSocket Person Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?private-key=${privateKey}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?privateKey=${privateKey}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {

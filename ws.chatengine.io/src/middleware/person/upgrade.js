@@ -1,11 +1,19 @@
 import auth from "../../lib/auth.js";
 
+function getQueryParam(queryParameters, param) {
+  const value = queryParameters.get(param);
+  return value === null ? undefined : value;
+}
+
 export default function upgradePerson(res, req, context) {
-  // Extract headers synchronously
-  const project = req.getHeader("project-id");
-  const username = req.getHeader("user-name");
-  const secret = req.getHeader("user-secret");
-  const privateKey = req.getHeader("private-key");
+  // Extract query parameters synchronously
+  const query = req.getQuery();
+  const queryParameters = new URLSearchParams(query);
+  const project = getQueryParam(queryParameters, "project-id");
+  const username = getQueryParam(queryParameters, "user-name");
+  const secret = getQueryParam(queryParameters, "user-secret");
+  const privateKey = getQueryParam(queryParameters, "private-key");
+
   const secWebSocketKey = req.getHeader("sec-websocket-key");
   const secWebSocketProtocol = req.getHeader("sec-websocket-protocol");
   const secWebSocketExtensions = req.getHeader("sec-websocket-extensions");

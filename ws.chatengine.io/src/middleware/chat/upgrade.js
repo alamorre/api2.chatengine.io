@@ -6,17 +6,13 @@ function getQueryParam(queryParameters, param) {
 }
 
 export default function upgradeChat(res, req, context) {
+  // Extract query parameters synchronously
   const query = req.getQuery();
   const queryParameters = new URLSearchParams(query);
-  let project = getQueryParam(queryParameters, "project-id");
-  let chatID = getQueryParam(queryParameters, "chat-id");
-  let accessKey = getQueryParam(queryParameters, "access-key");
-  let privateKey = getQueryParam(queryParameters, "private-key");
-
-  console.log("project", project);
-  console.log("chatID", chatID);
-  console.log("accessKey", accessKey);
-  console.log("privateKey", privateKey);
+  const project = getQueryParam(queryParameters, "project-id");
+  const chatID = getQueryParam(queryParameters, "chat-id");
+  const accessKey = getQueryParam(queryParameters, "access-key");
+  const privateKey = getQueryParam(queryParameters, "private-key");
 
   // Extract headers synchronously
   const secWebSocketKey = req.getHeader("sec-websocket-key");

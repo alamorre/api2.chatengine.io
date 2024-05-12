@@ -12,5 +12,5 @@ const username = "adam";
 const secret = "pass1234";
 
 const ws2 = new WebSocket(
-  `ws://localhost:9001/person/?project-id=${projectId}&user-name=${username}&user-secret=${secret}`
+  `ws://localhost:9001/person_v4/?project-id=${projectId}&user-name=${username}&user-secret=${secret}`
 );

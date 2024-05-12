@@ -13,12 +13,11 @@ export default async function authSessionToken(sessionToken) {
   }
 
   try {
-    const url = `${process.env.API_URL}/users/me/session/${sessionToken}/`;
-    const response = await axios.get(url);
-    const id = response.data.id.toString();
+    const url = `${process.env.API_URL}/users/session_auth/${sessionToken}/`;
+    await axios.get(url);
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
-    await redisCache.set(cacheKey, id, "EX", 900);
-    return { success: true, id };
+    await redisCache.set(cacheKey, "1", "EX", 900);
+    return { success: true, id: 1 };
   } catch (error) {
     console.log("Sessiont token auth failed", error);
     await redisCache.set(cacheKey, "-1", "EX", 900);

@@ -13,6 +13,7 @@ describe("WebSocket Person Tests", () => {
   const privateKey = "6d3b85b2-000a-427f-86e0-76c41f6cd5ec";
   const username = "adam";
   const secret = "pass1234";
+  const sessionToken = "st-e22cdbca-5d40-4453-bf01-31071d1ad5a4";
 
   beforeAll((done) => {
     redisCache.flushall();
@@ -176,4 +177,74 @@ describe("WebSocket Person Tests", () => {
       done();
     };
   });
+
+  test("Authenticate person successfully with session token", (done) => {
+    const expectedApiResponse = { status: 200, data: { id: 1 } };
+    axios.get.mockResolvedValueOnce(expectedApiResponse);
+
+    const url = `${wsUrl}?session_token=${sessionToken}`;
+    client = new WebSocket(url);
+
+    client.onopen = () => {
+      expect(axios.get).toHaveBeenCalledWith(
+        `${process.env.API_URL}/users/session_auth/${sessionToken}/`
+      );
+      client.send("Hello, world!");
+    };
+
+    client.onmessage = (event) => {
+      expect(event.data).toBe("Hello, world!");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person successfully with caching", (done) => {
+    const cacheKey = `session-${sessionToken}`;
+    redisCache.set(cacheKey, 1, "EX", 900);
+
+    const url = `${wsUrl}?session_token=${sessionToken}`;
+    client = new WebSocket(url);
+
+    client.onopen = () => {
+      expect(axios.get).not.toHaveBeenCalled();
+      client.send("Hello, world!");
+    };
+
+    client.onmessage = (event) => {
+      expect(event.data).toBe("Hello, world!");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).toBeTruthy();
+      done();
+    };
+  });
+
+  // test("Authenticate person unsuccessfully with session token", (done) => {
+  //   const expectedApiResponse = { status: 404, data: {} };
+  //   axios.get.mockResolvedValueOnce(expectedApiResponse);
+
+  //   const badSessionToken = "aaaaaaaa";
+  //   const url = `${wsUrl}?session_token=${badSessionToken}`;
+  //   client = new WebSocket(url);
+
+  //   client.onerror = (event) => {
+  //     // expect(event.message).toBe("Unexpected server response: 401");
+  //     expect(axios.get).toHaveBeenCalledWith(
+  //       `${process.env.API_URL}/users/session_auth/${badSessionToken}/`
+  //     );
+  //     client.close();
+  //   };
+
+  //   client.onclose = (event) => {
+  //     expect(event.wasClean).not.toBeTruthy();
+  //     done();
+  //   };
+  // });
 });

@@ -48,6 +48,7 @@ export default function upgradePerson(res, req, context) {
         });
       })
       .catch((e) => {
+        console.log("sesion auth error");
         if (res.aborted) return; // Do not use res if it has been marked as aborted
 
         // Use cork to buffer writes

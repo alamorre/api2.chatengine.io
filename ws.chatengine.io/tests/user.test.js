@@ -226,25 +226,45 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  // test("Authenticate person unsuccessfully with session token", (done) => {
-  //   const expectedApiResponse = { status: 404, data: {} };
-  //   axios.get.mockResolvedValueOnce(expectedApiResponse);
+  test("Authenticate person unsuccessfully with session token", (done) => {
+    const expectedApiResponse = { status: 404, data: {} };
+    axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-  //   const badSessionToken = "aaaaaaaa";
-  //   const url = `${wsUrl}?session_token=${badSessionToken}`;
-  //   client = new WebSocket(url);
+    const badSessionToken = "aaaaaaaa";
+    const url = `${wsUrl}?session_token=${badSessionToken}`;
+    client = new WebSocket(url);
 
-  //   client.onerror = (event) => {
-  //     // expect(event.message).toBe("Unexpected server response: 401");
-  //     expect(axios.get).toHaveBeenCalledWith(
-  //       `${process.env.API_URL}/users/session_auth/${badSessionToken}/`
-  //     );
-  //     client.close();
-  //   };
+    client.onerror = (event) => {
+      expect(event.message).toBe("Unexpected server response: 401");
+      expect(axios.get).toHaveBeenCalledWith(
+        `${process.env.API_URL}/users/session_auth/${badSessionToken}/`
+      );
+      client.close();
+    };
 
-  //   client.onclose = (event) => {
-  //     expect(event.wasClean).not.toBeTruthy();
-  //     done();
-  //   };
-  // });
+    client.onclose = (event) => {
+      expect(event.wasClean).not.toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person unsuccessfully with caching", (done) => {
+    const badSessionToken = "aaaaaaaa";
+    const cacheKey = `session-${badSessionToken}`;
+    redisCache.set(cacheKey, "-1", "EX", 900);
+
+    const url = `${wsUrl}?session_token=${badSessionToken}`;
+    client = new WebSocket(url);
+
+    client.onerror = (event) => {
+      expect(axios.get).not.toHaveBeenCalled();
+      expect(event.message).toBe("Unexpected server response: 401");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).not.toBeTruthy();
+      done();
+    };
+  });
 });

@@ -22,8 +22,12 @@ export default async function authChat(project, chatID, accessKey, privateKey) {
       },
     });
 
-    const id = response.data.id.toString();
+    if (response.status !== 200) {
+      throw new Error("Invalid project, chat ID, access key, or private key");
+    }
+
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
+    const id = response.data.id.toString();
     await redisCache.set(cacheKey, id, "EX", 900);
     return { success: true, id };
   } catch (error) {

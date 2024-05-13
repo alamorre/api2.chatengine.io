@@ -20,7 +20,7 @@ dotenv.config();
 const app = uWS.App();
 
 // Define WebSocket route for /person/
-app.ws("/person/", {
+app.ws("/person_v4/", {
   compression: uWS.SHARED_COMPRESSOR,
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 300,

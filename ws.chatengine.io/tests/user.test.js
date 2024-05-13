@@ -8,11 +8,12 @@ import { redisCache, redisSubscriber } from "../src/lib/redis.js";
 describe("WebSocket Person Tests", () => {
   let token;
   let client;
-  const wsUrl = "ws://localhost:9001/person/";
+  const wsUrl = "ws://localhost:9001/person_v4/";
   const projectId = "c5394dc3-a877-4125-ace1-4baed7a98447";
   const privateKey = "6d3b85b2-000a-427f-86e0-76c41f6cd5ec";
   const username = "adam";
   const secret = "pass1234";
+  const sessionToken = "st-e22cdbca-5d40-4453-bf01-31071d1ad5a4";
 
   beforeAll((done) => {
     redisCache.flushall();
@@ -37,7 +38,7 @@ describe("WebSocket Person Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?project-id=${projectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {
@@ -72,7 +73,7 @@ describe("WebSocket Person Tests", () => {
     const cacheKey = `auth-${projectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
-    const url = `${wsUrl}?project-id=${projectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     client.onopen = () => {
@@ -96,7 +97,7 @@ describe("WebSocket Person Tests", () => {
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-    const url = `${wsUrl}?project-id=${badProjectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {
@@ -127,7 +128,7 @@ describe("WebSocket Person Tests", () => {
     const cacheKey = `auth-${badProjectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, "-1", "EX", 900);
 
-    const url = `${wsUrl}?project-id=${badProjectId}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     client.onerror = (event) => {
@@ -146,7 +147,7 @@ describe("WebSocket Person Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?private-key=${privateKey}&user-name=${username}&user-secret=${secret}`;
+    const url = `${wsUrl}?privateKey=${privateKey}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
 
     const options = {
@@ -173,6 +174,96 @@ describe("WebSocket Person Tests", () => {
 
     client.onclose = (event) => {
       expect(event.wasClean).toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person successfully with session token", (done) => {
+    const expectedApiResponse = { status: 200, data: { id: 1 } };
+    axios.get.mockResolvedValueOnce(expectedApiResponse);
+
+    const url = `${wsUrl}?session_token=${sessionToken}`;
+    client = new WebSocket(url);
+
+    client.onopen = () => {
+      expect(axios.get).toHaveBeenCalledWith(
+        `${process.env.API_URL}/users/session_auth/${sessionToken}/`
+      );
+      client.send("Hello, world!");
+    };
+
+    client.onmessage = (event) => {
+      expect(event.data).toBe("Hello, world!");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person successfully with caching", (done) => {
+    const cacheKey = `session-${sessionToken}`;
+    redisCache.set(cacheKey, 1, "EX", 900);
+
+    const url = `${wsUrl}?session_token=${sessionToken}`;
+    client = new WebSocket(url);
+
+    client.onopen = () => {
+      expect(axios.get).not.toHaveBeenCalled();
+      client.send("Hello, world!");
+    };
+
+    client.onmessage = (event) => {
+      expect(event.data).toBe("Hello, world!");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person unsuccessfully with session token", (done) => {
+    const expectedApiResponse = { status: 404, data: {} };
+    axios.get.mockResolvedValueOnce(expectedApiResponse);
+
+    const badSessionToken = "aaaaaaaa";
+    const url = `${wsUrl}?session_token=${badSessionToken}`;
+    client = new WebSocket(url);
+
+    client.onerror = (event) => {
+      expect(event.message).toBe("Unexpected server response: 401");
+      expect(axios.get).toHaveBeenCalledWith(
+        `${process.env.API_URL}/users/session_auth/${badSessionToken}/`
+      );
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).not.toBeTruthy();
+      done();
+    };
+  });
+
+  test("Authenticate person unsuccessfully with caching", (done) => {
+    const badSessionToken = "aaaaaaaa";
+    const cacheKey = `session-${badSessionToken}`;
+    redisCache.set(cacheKey, "-1", "EX", 900);
+
+    const url = `${wsUrl}?session_token=${badSessionToken}`;
+    client = new WebSocket(url);
+
+    client.onerror = (event) => {
+      expect(axios.get).not.toHaveBeenCalled();
+      expect(event.message).toBe("Unexpected server response: 401");
+      client.close();
+    };
+
+    client.onclose = (event) => {
+      expect(event.wasClean).not.toBeTruthy();
       done();
     };
   });

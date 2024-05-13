@@ -37,7 +37,7 @@ describe("WebSocket Chat Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?project-id=${projectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    const url = `${wsUrl}?projectID=${projectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
     const options = {
@@ -78,7 +78,7 @@ describe("WebSocket Chat Tests", () => {
     const cacheKey = `chat-auth-${projectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
-    const url = `${wsUrl}?project-id=${projectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    const url = `${wsUrl}?projectID=${projectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
     client.onopen = () => {
@@ -102,7 +102,7 @@ describe("WebSocket Chat Tests", () => {
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
-    const url = `${wsUrl}?project-id=${badProjectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
     const options = {
@@ -139,7 +139,7 @@ describe("WebSocket Chat Tests", () => {
     const cacheKey = `chat-auth-${badProjectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, "-1", "EX", 900);
 
-    const url = `${wsUrl}?project-id=${badProjectId}&chat-id=${chatID}&access-key=${accessKey}`;
+    const url = `${wsUrl}?projectID=${badProjectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
     client.onerror = (event) => {
@@ -158,7 +158,7 @@ describe("WebSocket Chat Tests", () => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
-    const url = `${wsUrl}?private-key=${privateKey}&chat-id=${chatID}`;
+    const url = `${wsUrl}?privateKey=${privateKey}&chatID=${chatID}`;
     client = new WebSocket(url);
 
     const options = {

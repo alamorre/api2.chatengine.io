@@ -146,7 +146,7 @@ resource "kubernetes_ingress_v1" "ingress_policy" {
           }
         }
         path {
-          path      = "/person/*"
+          path      = "/person_v4/*"
           path_type = "Prefix"
           backend {
             service {

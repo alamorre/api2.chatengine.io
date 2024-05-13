@@ -78,6 +78,17 @@ class SearchOtherUsers(APIView):
         serializer = PersonSerializer(people, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class SessionTokenAuth(APIView):
+    throttle_scope = 'burst'
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = (UserSecretAuthentication,)
+
+    def get(self, _, session_token):
+        # TODO: add cache with redis
+        session = get_object_or_404(Session, token=session_token)
+        serializer = SessionSerializer(session, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class PeoplePrivateApi(APIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = (permissions.IsAuthenticated,)

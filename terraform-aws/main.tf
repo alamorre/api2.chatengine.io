@@ -161,11 +161,66 @@ resource "aws_ecs_service" "nginx_service" {
     assign_public_ip = true
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.nginx_tg.arn
+    container_name   = "nginx"
+    container_port   = 80
+  }
+
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution]
 
   lifecycle {
     ignore_changes = [
       desired_count, # Add more fields here as needed
     ]
+  }
+}
+
+
+# Load balancer
+
+resource "aws_lb" "nginx_alb" {
+  name               = "nginx-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.http_sg.id]
+  subnets            = [aws_subnet.my_subnet1.id, aws_subnet.my_subnet2.id]
+
+  tags = {
+    Name = "nginx-load-balancer"
+  }
+}
+
+resource "aws_lb_target_group" "nginx_tg" {
+  name        = "nginx-target-group"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.my_vpc.id
+  target_type = "ip" # Specify target type as IP
+
+  health_check {
+    path                = "/"
+    port                = "80"
+    protocol            = "HTTP"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
+    matcher             = "200"
+  }
+
+  tags = {
+    Name = "nginx-target-group"
+  }
+}
+
+resource "aws_lb_listener" "nginx_listener" {
+  load_balancer_arn = aws_lb.nginx_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.nginx_tg.arn
   }
 }

@@ -158,7 +158,7 @@ resource "aws_ecs_service" "nginx_service" {
   network_configuration {
     subnets          = [aws_subnet.my_subnet1.id, aws_subnet.my_subnet2.id]
     security_groups  = [aws_security_group.http_sg.id]
-    assign_public_ip = false
+    assign_public_ip = true
   }
 
   load_balancer {

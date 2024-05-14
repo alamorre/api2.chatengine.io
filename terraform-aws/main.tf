@@ -117,9 +117,9 @@ resource "aws_ecs_task_definition" "nginx" {
       essential = true
       portMappings = [
         {
-          containerPort = 80
-          hostPort      = 80
-          protocol      = "tcp"
+          containerPort = 8001
+          # hostPort      = 80
+          protocol = "tcp"
         }
       ]
     }
@@ -164,7 +164,7 @@ resource "aws_ecs_service" "nginx_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.nginx_tg.arn
     container_name   = "nginx"
-    container_port   = 80
+    container_port   = 8001
   }
 
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution]
@@ -194,7 +194,7 @@ resource "aws_lb_target_group" "nginx_tg" {
 
   health_check {
     path                = "/"
-    port                = "80"
+    port                = "8001"
     protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2

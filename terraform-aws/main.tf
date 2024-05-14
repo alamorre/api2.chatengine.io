@@ -117,7 +117,7 @@ resource "aws_ecs_task_definition" "nginx" {
       essential = true
       portMappings = [
         {
-          containerPort = 8001
+          containerPort = 80
           # hostPort      = 80
           protocol = "tcp"
         }
@@ -164,7 +164,7 @@ resource "aws_ecs_service" "nginx_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.nginx_tg.arn
     container_name   = "nginx"
-    container_port   = 8001
+    container_port   = 80
   }
 
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution]
@@ -194,7 +194,7 @@ resource "aws_lb_target_group" "nginx_tg" {
 
   health_check {
     path                = "/"
-    port                = "8001"
+    port                = "80"
     protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -223,38 +223,38 @@ resource "aws_lb_listener" "nginx_listener" {
   }
 }
 
-# # Route53 and SSL
+# Route53 and SSL
 
-# resource "aws_acm_certificate" "api_cert" {
-#   domain_name       = var.domain_name
-#   validation_method = "DNS"
-#   tags = {
-#     Environment = "production"
-#   }
-# }
+resource "aws_acm_certificate" "api_cert" {
+  domain_name       = var.domain_name
+  validation_method = "DNS"
+  tags = {
+    Environment = "production"
+  }
+}
 
-# resource "aws_route53_record" "api_cert_validation" {
-#   name    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_name
-#   type    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_type
-#   records = [tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_value]
-#   ttl     = 60
+resource "aws_route53_record" "api_cert_validation" {
+  name    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_type
+  records = [tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_value]
+  ttl     = 60
 
-#   zone_id = var.zone_id
-# }
+  zone_id = var.zone_id
+}
 
-# resource "aws_acm_certificate_validation" "api_cert_validation" {
-#   certificate_arn         = aws_acm_certificate.api_cert.arn
-#   validation_record_fqdns = [aws_route53_record.api_cert_validation.fqdn]
-# }
+resource "aws_acm_certificate_validation" "api_cert_validation" {
+  certificate_arn         = aws_acm_certificate.api_cert.arn
+  validation_record_fqdns = [aws_route53_record.api_cert_validation.fqdn]
+}
 
-# resource "aws_route53_record" "api_dns" {
-#   zone_id = var.zone_id
-#   name    = var.domain_name
-#   type    = "CNAME"
+resource "aws_route53_record" "api_dns" {
+  zone_id = var.zone_id
+  name    = var.domain_name
+  type    = "CNAME"
 
-#   alias {
-#     name                   = aws_lb.nginx_alb.dns_name
-#     zone_id                = aws_lb.nginx_alb.zone_id
-#     evaluate_target_health = true
-#   }
-# }
+  alias {
+    name                   = aws_lb.nginx_alb.dns_name
+    zone_id                = aws_lb.nginx_alb.zone_id
+    evaluate_target_health = true
+  }
+}

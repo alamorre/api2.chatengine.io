@@ -168,12 +168,6 @@ resource "aws_ecs_service" "nginx_service" {
   }
 
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution]
-
-  lifecycle {
-    ignore_changes = [
-      desired_count, # Add more fields here as needed
-    ]
-  }
 }
 
 
@@ -218,9 +212,49 @@ resource "aws_lb_listener" "nginx_listener" {
   load_balancer_arn = aws_lb.nginx_alb.arn
   port              = 80
   protocol          = "HTTP"
+  # port            = 443
+  # protocol        = "HTTPS"
+  # ssl_policy      = "ELBSecurityPolicy-2016-08"
+  # certificate_arn = aws_acm_certificate.api_cert.arn
 
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.nginx_tg.arn
   }
 }
+
+# # Route53 and SSL
+
+# resource "aws_acm_certificate" "api_cert" {
+#   domain_name       = var.domain_name
+#   validation_method = "DNS"
+#   tags = {
+#     Environment = "production"
+#   }
+# }
+
+# resource "aws_route53_record" "api_cert_validation" {
+#   name    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_name
+#   type    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_type
+#   records = [tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_value]
+#   ttl     = 60
+
+#   zone_id = var.zone_id
+# }
+
+# resource "aws_acm_certificate_validation" "api_cert_validation" {
+#   certificate_arn         = aws_acm_certificate.api_cert.arn
+#   validation_record_fqdns = [aws_route53_record.api_cert_validation.fqdn]
+# }
+
+# resource "aws_route53_record" "api_dns" {
+#   zone_id = var.zone_id
+#   name    = var.domain_name
+#   type    = "CNAME"
+
+#   alias {
+#     name                   = aws_lb.nginx_alb.dns_name
+#     zone_id                = aws_lb.nginx_alb.zone_id
+#     evaluate_target_health = true
+#   }
+# }

@@ -5,26 +5,26 @@ provider "aws" {
 
 # VPC
 
-resource "aws_vpc" "my_vpc" {
+resource "aws_vpc" "ce_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = {
-    Name = "my-vpc"
+    Name = "ce-vpc"
   }
 }
 
-resource "aws_internet_gateway" "my_igw" {
-  vpc_id = aws_vpc.my_vpc.id
+resource "aws_internet_gateway" "ce_igw" {
+  vpc_id = aws_vpc.ce_vpc.id
 
   tags = {
-    Name = "my-internet-gateway"
+    Name = "ce-internet-gateway"
   }
 }
 
 resource "aws_subnet" "my_subnet1" {
-  vpc_id                  = aws_vpc.my_vpc.id
+  vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
@@ -35,7 +35,7 @@ resource "aws_subnet" "my_subnet1" {
 }
 
 resource "aws_subnet" "my_subnet2" {
-  vpc_id                  = aws_vpc.my_vpc.id
+  vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
@@ -46,11 +46,11 @@ resource "aws_subnet" "my_subnet2" {
 }
 
 resource "aws_route_table" "my_route_table" {
-  vpc_id = aws_vpc.my_vpc.id
+  vpc_id = aws_vpc.ce_vpc.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.my_igw.id
+    gateway_id = aws_internet_gateway.ce_igw.id
   }
 
   tags = {
@@ -71,7 +71,7 @@ resource "aws_route_table_association" "my_rta2" {
 resource "aws_security_group" "http_sg" {
   name        = "http-sg"
   description = "Security group for HTTP access"
-  vpc_id      = aws_vpc.my_vpc.id
+  vpc_id      = aws_vpc.ce_vpc.id
 
   ingress {
     description = "Allow HTTP inbound traffic"
@@ -189,7 +189,7 @@ resource "aws_lb_target_group" "nginx_tg" {
   name        = "nginx-target-group"
   port        = 80
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.my_vpc.id
+  vpc_id      = aws_vpc.ce_vpc.id
   target_type = "ip" # Specify target type as IP
 
   health_check {

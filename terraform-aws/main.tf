@@ -68,14 +68,14 @@ resource "aws_route_table_association" "ce_rta2" {
   route_table_id = aws_route_table.ce_route_table.id
 }
 
-resource "aws_security_group" "http_sg" {
-  name        = "ce-http-sg"
-  description = "Security group for HTTP access"
+resource "aws_security_group" "external_sg" {
+  name        = "ce-external-sg"
+  description = "Security group for HTTPS access"
   vpc_id      = aws_vpc.ce_vpc.id
 
   ingress {
-    description = "Allow HTTP inbound traffic"
-    from_port   = 80
+    description = "Allow HTTPS inbound traffic"
+    from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Allows access from any IP
@@ -90,7 +90,33 @@ resource "aws_security_group" "http_sg" {
   }
 
   tags = {
-    Name = "HTTP Security Group"
+    Name = "HTTPS (External) Security Group"
+  }
+}
+
+resource "aws_security_group" "internal_sg" {
+  name        = "ce-internal-sg"
+  description = "Security group for internal networking"
+  vpc_id      = aws_vpc.ce_vpc.id
+
+  ingress {
+    description = "Allow all inbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"] # Allows access from any IP
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # -1 signifies all protocols
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "All (Internal) Security Group"
   }
 }
 
@@ -157,7 +183,7 @@ resource "aws_ecs_service" "nginx_service" {
 
   network_configuration {
     subnets          = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
-    security_groups  = [aws_security_group.http_sg.id]
+    security_groups  = [aws_security_group.internal_sg.id]
     assign_public_ip = true
   }
 
@@ -177,7 +203,7 @@ resource "aws_lb" "nginx_alb" {
   name               = "nginx-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.http_sg.id]
+  security_groups    = [aws_security_group.external_sg.id]
   subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 
   tags = {

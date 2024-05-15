@@ -27,10 +27,10 @@ resource "aws_subnet" "subnet1" {
   vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
-    Name = "ce-public-subnet1"
+    Name = "ce-private-subnet1"
   }
 }
 
@@ -38,10 +38,10 @@ resource "aws_subnet" "subnet2" {
   vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
-    Name = "ce-public-subnet2"
+    Name = "ce-private-subnet2"
   }
 }
 
@@ -184,7 +184,7 @@ resource "aws_ecs_service" "nginx_service" {
   network_configuration {
     subnets          = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
     security_groups  = [aws_security_group.internal_sg.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {

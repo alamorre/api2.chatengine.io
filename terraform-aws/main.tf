@@ -23,29 +23,29 @@ resource "aws_internet_gateway" "ce_igw" {
   }
 }
 
-resource "aws_subnet" "my_subnet1" {
+resource "aws_subnet" "subnet1" {
   vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "my-public-subnet1"
+    Name = "ce-public-subnet1"
   }
 }
 
-resource "aws_subnet" "my_subnet2" {
+resource "aws_subnet" "subnet2" {
   vpc_id                  = aws_vpc.ce_vpc.id
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "my-public-subnet2"
+    Name = "ce-public-subnet2"
   }
 }
 
-resource "aws_route_table" "my_route_table" {
+resource "aws_route_table" "ce_route_table" {
   vpc_id = aws_vpc.ce_vpc.id
 
   route {
@@ -54,22 +54,22 @@ resource "aws_route_table" "my_route_table" {
   }
 
   tags = {
-    Name = "my-route-table"
+    Name = "ce-route-table"
   }
 }
 
-resource "aws_route_table_association" "my_rta1" {
-  subnet_id      = aws_subnet.my_subnet1.id
-  route_table_id = aws_route_table.my_route_table.id
+resource "aws_route_table_association" "ce_rta1" {
+  subnet_id      = aws_subnet.subnet1.id
+  route_table_id = aws_route_table.ce_route_table.id
 }
 
-resource "aws_route_table_association" "my_rta2" {
-  subnet_id      = aws_subnet.my_subnet2.id
-  route_table_id = aws_route_table.my_route_table.id
+resource "aws_route_table_association" "ce_rta2" {
+  subnet_id      = aws_subnet.subnet2.id
+  route_table_id = aws_route_table.ce_route_table.id
 }
 
 resource "aws_security_group" "http_sg" {
-  name        = "http-sg"
+  name        = "ce-http-sg"
   description = "Security group for HTTP access"
   vpc_id      = aws_vpc.ce_vpc.id
 
@@ -156,7 +156,7 @@ resource "aws_ecs_service" "nginx_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = [aws_subnet.my_subnet1.id, aws_subnet.my_subnet2.id]
+    subnets          = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
     security_groups  = [aws_security_group.http_sg.id]
     assign_public_ip = true
   }
@@ -178,7 +178,7 @@ resource "aws_lb" "nginx_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.http_sg.id]
-  subnets            = [aws_subnet.my_subnet1.id, aws_subnet.my_subnet2.id]
+  subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 
   tags = {
     Name = "nginx-load-balancer"

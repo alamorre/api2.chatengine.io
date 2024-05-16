@@ -127,7 +127,7 @@ resource "aws_ecs_cluster" "nginx_cluster" {
 }
 
 resource "aws_ecs_task_definition" "nginx" {
-  family                   = "nginx"
+  family                   = "apichatengine"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256" # Adjust based on your requirements
@@ -136,16 +136,15 @@ resource "aws_ecs_task_definition" "nginx" {
 
   container_definitions = jsonencode([
     {
-      name      = "nginx"
-      image     = "nginx:latest"
+      name      = "apichatengine"
+      image     = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest"
       cpu       = 256
       memory    = 512
       essential = true
       portMappings = [
         {
-          containerPort = 80
-          # hostPort      = 80
-          protocol = "tcp"
+          containerPort = 8080
+          protocol      = "tcp"
         }
       ]
     }
@@ -175,7 +174,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
 }
 
 resource "aws_ecs_service" "nginx_service" {
-  name            = "nginx-service"
+  name            = "apichatengine-service"
   cluster         = aws_ecs_cluster.nginx_cluster.id
   task_definition = aws_ecs_task_definition.nginx.arn
   desired_count   = 1
@@ -189,8 +188,8 @@ resource "aws_ecs_service" "nginx_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.nginx_tg.arn
-    container_name   = "nginx"
-    container_port   = 80
+    container_name   = "apichatengine"
+    container_port   = 8080
   }
 
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution]
@@ -212,15 +211,15 @@ resource "aws_lb" "nginx_alb" {
 }
 
 resource "aws_lb_target_group" "nginx_tg" {
-  name        = "nginx-target-group"
-  port        = 80
+  name        = "apichatengine-target-group"
+  port        = 8080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.ce_vpc.id
   target_type = "ip" # Specify target type as IP
 
   health_check {
-    path                = "/"
-    port                = "80"
+    path                = "/health/"
+    port                = "8080"
     protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -230,7 +229,7 @@ resource "aws_lb_target_group" "nginx_tg" {
   }
 
   tags = {
-    Name = "nginx-target-group"
+    Name = "apichatengine-target-group"
   }
 }
 
@@ -282,4 +281,11 @@ resource "aws_route53_record" "api_dns" {
     zone_id                = aws_lb.nginx_alb.zone_id
     evaluate_target_health = true
   }
+}
+
+# ECR and permissions
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_ecr" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }

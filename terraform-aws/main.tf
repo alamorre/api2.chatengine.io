@@ -3,13 +3,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# ECR and permissions
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_ecr" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-}
-
 # Elasticache on Redis
 
 resource "aws_elasticache_subnet_group" "redis_subnet_group" {

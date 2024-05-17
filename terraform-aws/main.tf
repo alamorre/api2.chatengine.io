@@ -122,11 +122,11 @@ resource "aws_security_group" "internal_sg" {
 
 # ECS configuration
 
-resource "aws_ecs_cluster" "nginx_cluster" {
-  name = "nginx-cluster"
+resource "aws_ecs_cluster" "ce_api_cluster" {
+  name = "ce-api-cluster"
 }
 
-resource "aws_ecs_task_definition" "nginx" {
+resource "aws_ecs_task_definition" "ce_api_td" {
   family                   = "apichatengine"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -183,10 +183,10 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-resource "aws_ecs_service" "nginx_service" {
+resource "aws_ecs_service" "ce_api_service" {
   name            = "apichatengine-service"
-  cluster         = aws_ecs_cluster.nginx_cluster.id
-  task_definition = aws_ecs_task_definition.nginx.arn
+  cluster         = aws_ecs_cluster.ce_api_cluster.id
+  task_definition = aws_ecs_task_definition.ce_api_td.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -197,7 +197,7 @@ resource "aws_ecs_service" "nginx_service" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.nginx_tg.arn
+    target_group_arn = aws_lb_target_group.ce_api_tg.arn
     container_name   = "apichatengine"
     container_port   = 8080
   }
@@ -208,19 +208,19 @@ resource "aws_ecs_service" "nginx_service" {
 
 # Load balancer
 
-resource "aws_lb" "nginx_alb" {
-  name               = "nginx-alb"
+resource "aws_lb" "ce_alb" {
+  name               = "ce-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.external_sg.id]
   subnets            = [aws_subnet.subnet1.id, aws_subnet.subnet2.id]
 
   tags = {
-    Name = "nginx-load-balancer"
+    Name = "ce-load-balancer"
   }
 }
 
-resource "aws_lb_target_group" "nginx_tg" {
+resource "aws_lb_target_group" "ce_api_tg" {
   name        = "apichatengine-target-group"
   port        = 8080
   protocol    = "HTTP"
@@ -243,8 +243,8 @@ resource "aws_lb_target_group" "nginx_tg" {
   }
 }
 
-resource "aws_lb_listener" "nginx_https_listener" {
-  load_balancer_arn = aws_lb.nginx_alb.arn
+resource "aws_lb_listener" "ce_api_listener" {
+  load_balancer_arn = aws_lb.ce_alb.arn
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08"
@@ -252,7 +252,7 @@ resource "aws_lb_listener" "nginx_https_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.nginx_tg.arn
+    target_group_arn = aws_lb_target_group.ce_api_tg.arn
   }
 }
 
@@ -287,8 +287,8 @@ resource "aws_route53_record" "api_dns" {
 
   alias {
     # dualstack prefix is required for ALB
-    name                   = "dualstack.${aws_lb.nginx_alb.dns_name}"
-    zone_id                = aws_lb.nginx_alb.zone_id
+    name                   = "dualstack.${aws_lb.ce_alb.dns_name}"
+    zone_id                = aws_lb.ce_alb.zone_id
     evaluate_target_health = true
   }
 }

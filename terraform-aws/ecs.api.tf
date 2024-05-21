@@ -13,7 +13,7 @@ resource "aws_ecs_task_definition" "ce_api_td" {
   container_definitions = jsonencode([
     {
       name      = "apichatengine"
-      image     = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:latest"
+      image     = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag_api}"
       cpu       = 256
       memory    = 512
       essential = true
@@ -25,12 +25,76 @@ resource "aws_ecs_task_definition" "ce_api_td" {
       ]
       environment = [
         {
+          name  = "API_URL"
+          value = var.api_url
+        },
+        {
+          name  = "AWS_ACCESS_KEY_ID"
+          value = var.aws_access_key_id
+        },
+        {
+          name  = "AWS_SECRET_ACCESS_KEY"
+          value = var.aws_secret_access_key
+        },
+        {
+          name  = "AWS_STORAGE_BUCKET_NAME"
+          value = var.aws_storage_bucket_name
+        },
+        {
+          name  = "DB_NAME"
+          value = var.db_name
+        },
+        {
+          name  = "DB_USER_NM"
+          value = var.db_username
+        },
+        {
+          name  = "DB_USER_PW"
+          value = var.db_password
+        },
+        {
+          name  = "PIPELINE"
+          value = var.pipeline
+        },
+        {
           name  = "REDIS_HOST"
           value = aws_elasticache_cluster.redis_cluster.cache_nodes[0].address
         },
         {
           name  = "REDIS_PORT"
           value = tostring(aws_elasticache_cluster.redis_cluster.port)
+        },
+        {
+          name  = "SECRET_KEY"
+          value = var.secret_key
+        },
+        {
+          name  = "SEND_GRID_KEY"
+          value = var.send_grid_key
+        },
+        {
+          name  = "SENTRY_DSN"
+          value = var.sentry_dsn
+        },
+        {
+          name  = "STRIPE_KEY"
+          value = var.stripe_key
+        },
+        {
+          name  = "STRIPE_LIGHT_PLAN"
+          value = var.stripe_light_plan
+        },
+        {
+          name  = "STRIPE_PRODUCTION_PLAN"
+          value = var.stripe_production_plan
+        },
+        {
+          name  = "STRIPE_PROFESSIONAL_PLAN"
+          value = var.stripe_professional_plan
+        },
+        {
+          name  = "STRIPE_TAX_RATE"
+          value = var.stripe_tax_rate
         }
       ]
     }

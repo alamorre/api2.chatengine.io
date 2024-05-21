@@ -42,7 +42,7 @@ app.ws("/chat/", {
 });
 
 // HTTP route for health check
-app.get("/ws/health/", (res, req) => {
+app.get("/health/", (res, req) => {
   res.writeStatus("200 OK").end("Healthy");
 });
 

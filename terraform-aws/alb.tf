@@ -33,16 +33,16 @@ resource "aws_lb_target_group" "ce_api_tg" {
   }
 }
 
-resource "aws_lb_target_group" "ce_person_tg" {
-  name        = "person-target-group"
-  port        = 8080
+resource "aws_lb_target_group" "ce_ws_tg" {
+  name        = "ws-target-group"
+  port        = 9001
   protocol    = "HTTP"
   vpc_id      = aws_vpc.ce_vpc.id
   target_type = "ip" # Specify target type as IP
 
   health_check {
     path                = "/health/"
-    port                = "8080"
+    port                = "9001"
     protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
@@ -52,7 +52,7 @@ resource "aws_lb_target_group" "ce_person_tg" {
   }
 
   tags = {
-    Name = "person-target-group"
+    Name = "ws-target-group"
   }
 }
 
@@ -70,13 +70,13 @@ resource "aws_lb_listener" "ce_api_listener" {
 }
 
 # rule to route /person/* to person-target-group
-resource "aws_lb_listener_rule" "ce_person_listener_rule" {
+resource "aws_lb_listener_rule" "ce_ws_listener_rule" {
   listener_arn = aws_lb_listener.ce_api_listener.arn
   priority     = 90
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.ce_person_tg.arn
+    target_group_arn = aws_lb_target_group.ce_ws_tg.arn
   }
 
   condition {

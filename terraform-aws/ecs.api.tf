@@ -42,11 +42,11 @@ resource "aws_ecs_task_definition" "ce_api_td" {
         },
         {
           name  = "DB_HOST"
-          value = var.db_host
+          value = aws_rds_cluster.aurora_cluster.endpoint
         },
         {
           name  = "DB_PORT"
-          value = var.db_port
+          value = tostring(aws_rds_cluster.aurora_cluster.port)
         },
         {
           name  = "DB_NAME"

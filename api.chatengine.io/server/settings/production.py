@@ -9,8 +9,8 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER_NM'),
         "PASSWORD": os.getenv('DB_USER_PW'),
-        "HOST": '35.192.10.144',
-        "PORT": 5432,
+        "HOST": os.getenv('DB_HOST'),
+        "PORT": os.getenv('DB_PORT'),
     }
 }
 

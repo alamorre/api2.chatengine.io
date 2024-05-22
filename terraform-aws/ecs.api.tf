@@ -41,6 +41,14 @@ resource "aws_ecs_task_definition" "ce_api_td" {
           value = var.aws_storage_bucket_name
         },
         {
+          name  = "DB_HOST"
+          value = aws_rds_cluster.aurora_cluster.endpoint
+        },
+        {
+          name  = "DB_PORT"
+          value = tostring(aws_rds_cluster.aurora_cluster.port)
+        },
+        {
           name  = "DB_NAME"
           value = var.db_name
         },

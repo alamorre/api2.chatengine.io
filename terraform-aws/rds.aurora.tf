@@ -46,7 +46,7 @@ resource "aws_rds_cluster" "aurora_cluster" {
 # Create an Aurora DB instance
 resource "aws_rds_cluster_instance" "aurora_instance" {
   cluster_identifier  = aws_rds_cluster.aurora_cluster.id
-  instance_class      = "db.t3.small" # Specify your preferred instance class
+  instance_class      = "db.t3.medium" # Specify your preferred instance class
   engine              = aws_rds_cluster.aurora_cluster.engine
   engine_version      = aws_rds_cluster.aurora_cluster.engine_version
   publicly_accessible = true

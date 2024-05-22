@@ -37,8 +37,21 @@ resource "aws_ecs_task_definition" "ce_ws_td" {
           value = tostring(aws_elasticache_cluster.redis_cluster.port)
         },
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/wschatengine"
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
+}
+
+resource "aws_cloudwatch_log_group" "ce_ws_log_group" {
+  name              = "/ecs/wschatengine"
+  retention_in_days = 1 # Adjust based on your log retention policy
 }
 
 resource "aws_ecs_service" "ce_ws_service" {

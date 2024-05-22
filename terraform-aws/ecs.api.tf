@@ -97,8 +97,21 @@ resource "aws_ecs_task_definition" "ce_api_td" {
           value = var.stripe_tax_rate
         }
       ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/apichatengine"
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
+}
+
+resource "aws_cloudwatch_log_group" "ce_api_log_group" {
+  name              = "/ecs/apichatengine"
+  retention_in_days = 1 # Adjust based on your log retention policy
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {

@@ -72,8 +72,8 @@ variable "send_grid_key" {
   type        = string
 }
 
-variable "sentry_dsn" {
-  description = "Sentry DSN"
+variable "sentry_dsn_api" {
+  description = "Sentry DSN for api.chatengine.io"
   type        = string
 }
 

@@ -73,8 +73,8 @@ resource "aws_ecs_task_definition" "ce_api_td" {
           value = var.send_grid_key
         },
         {
-          name  = "SENTRY_DSN"
-          value = var.sentry_dsn
+          name  = "SENTRY_DSN_API"
+          value = var.sentry_dsn_api
         },
         {
           name  = "STRIPE_KEY"

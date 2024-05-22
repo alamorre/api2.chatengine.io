@@ -77,6 +77,11 @@ variable "sentry_dsn_api" {
   type        = string
 }
 
+variable "sentry_dsn_ws" {
+  description = "Sentry DSN for ws.chatengine.io"
+  type        = string
+}
+
 variable "stripe_key" {
   description = "Stripe API Key"
   type        = string

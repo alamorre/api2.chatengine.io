@@ -36,6 +36,10 @@ resource "aws_ecs_task_definition" "ce_ws_td" {
           name  = "REDIS_PORT"
           value = tostring(aws_elasticache_cluster.redis_cluster.port)
         },
+        {
+          name  = "SENTRY_DSN_WS"
+          value = var.sentry_dsn_ws
+        }
       ]
       logConfiguration = {
         logDriver = "awslogs"

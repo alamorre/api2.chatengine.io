@@ -1,4 +1,5 @@
 import uWS from "uWebSockets.js";
+import { withErrorHandling } from "./lib/sentry.js";
 
 import upgradePerson from "./middleware/person/upgrade.js";
 import openPerson from "./middleware/person/open.js";
@@ -19,15 +20,24 @@ dotenv.config();
 // Server
 const app = uWS.App();
 
-// Define WebSocket route for /person/
+// Define WebSocket route for /person_v4/
 app.ws("/person_v4/", {
   compression: uWS.SHARED_COMPRESSOR,
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 300,
-  upgrade: upgradePerson,
-  open: openPerson,
-  message: messagePerson,
-  close: closePerson,
+  upgrade: withErrorHandling(upgradePerson, {
+    route: "/person_v4/",
+    stage: "upgrade",
+  }),
+  open: withErrorHandling(openPerson, { route: "/person_v4/", stage: "open" }),
+  message: withErrorHandling(messagePerson, {
+    route: "/person_v4/",
+    stage: "message",
+  }),
+  close: withErrorHandling(closePerson, {
+    route: "/person_v4/",
+    stage: "close",
+  }),
 });
 
 // Define WebSocket route for /chat/
@@ -35,10 +45,16 @@ app.ws("/chat/", {
   compression: uWS.SHARED_COMPRESSOR,
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 300,
-  upgrade: upgradeChat,
-  open: openChat,
-  message: messageChat,
-  close: closeChat,
+  upgrade: withErrorHandling(upgradeChat, {
+    route: "/chat/",
+    stage: "upgrade",
+  }),
+  open: withErrorHandling(openChat, { route: "/chat/", stage: "open" }),
+  message: withErrorHandling(messageChat, {
+    route: "/chat/",
+    stage: "message",
+  }),
+  close: withErrorHandling(closeChat, { route: "/chat/", stage: "close" }),
 });
 
 // HTTP route for health check

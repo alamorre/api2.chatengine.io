@@ -1,6 +1,5 @@
-// Import with `import * as Sentry from "@sentry/node"` if you are using ESM
-const Sentry = require("@sentry/node");
-const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN_WS,
@@ -11,3 +10,22 @@ Sentry.init({
   // Set sampling rate for profiling - this is relative to tracesSampleRate
   profilesSampleRate: 1.0,
 });
+
+// Custom function to handle errors
+function handleError(err, context) {
+  Sentry.withScope((scope) => {
+    scope.setExtras(context);
+    Sentry.captureException(err);
+  });
+}
+
+// Higher-order function for error handling
+export function withErrorHandling(handler, context) {
+  return function (...args) {
+    try {
+      handler(...args);
+    } catch (err) {
+      handleError(err, context);
+    }
+  };
+}

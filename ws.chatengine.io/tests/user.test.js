@@ -71,7 +71,7 @@ describe("WebSocket Person Tests", () => {
 
   test("Authenticate person successfully with caching", (done) => {
     const cacheKey = `auth-${projectId}-${username}-${secret}-`;
-    redisCache.set(cacheKey, 1, "EX", 900);
+    redisCache.set(cacheKey, 1, "EX", 300);
 
     const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
@@ -126,7 +126,7 @@ describe("WebSocket Person Tests", () => {
   test("Authenticate person unsuccessfully with caching", (done) => {
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     const cacheKey = `auth-${badProjectId}-${username}-${secret}-`;
-    redisCache.set(cacheKey, "-1", "EX", 900);
+    redisCache.set(cacheKey, "-1", "EX", 300);
 
     const url = `${wsUrl}?projectID=${badProjectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
@@ -205,7 +205,7 @@ describe("WebSocket Person Tests", () => {
 
   test("Authenticate person successfully with caching", (done) => {
     const cacheKey = `session-${sessionToken}`;
-    redisCache.set(cacheKey, 1, "EX", 900);
+    redisCache.set(cacheKey, 1, "EX", 300);
 
     const url = `${wsUrl}?session_token=${sessionToken}`;
     client = new WebSocket(url);
@@ -251,7 +251,7 @@ describe("WebSocket Person Tests", () => {
   test("Authenticate person unsuccessfully with caching", (done) => {
     const badSessionToken = "aaaaaaaa";
     const cacheKey = `session-${badSessionToken}`;
-    redisCache.set(cacheKey, "-1", "EX", 900);
+    redisCache.set(cacheKey, "-1", "EX", 300);
 
     const url = `${wsUrl}?session_token=${badSessionToken}`;
     client = new WebSocket(url);

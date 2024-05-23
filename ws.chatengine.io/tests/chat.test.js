@@ -76,7 +76,7 @@ describe("WebSocket Chat Tests", () => {
 
   test("Authenticate chat successfully with caching", (done) => {
     const cacheKey = `chat-auth-${projectId}-${chatID}-${accessKey}-`;
-    redisCache.set(cacheKey, 1, "EX", 900);
+    redisCache.set(cacheKey, 1, "EX", 300);
 
     const url = `${wsUrl}?projectID=${projectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
@@ -137,7 +137,7 @@ describe("WebSocket Chat Tests", () => {
   test("Authenticate chat unsuccessfully with caching", (done) => {
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     const cacheKey = `chat-auth-${badProjectId}-${chatID}-${accessKey}-`;
-    redisCache.set(cacheKey, "-1", "EX", 900);
+    redisCache.set(cacheKey, "-1", "EX", 300);
 
     const url = `${wsUrl}?projectID=${badProjectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);

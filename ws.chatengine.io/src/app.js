@@ -67,11 +67,9 @@ app.any("/*", (res) => {
   res.end("Nothing to see here!");
 });
 
-redisSubscriber.psubscribe("person:*", "chat:*");
-
-redisSubscriber.on("pmessage", (_, channel, message) => {
-  console.log(`Publishing message to ${channel}`);
+redisSubscriber.on("message", (channel, message) => {
   app.publish(channel, message);
+  console.log(`Publishing message to ${channel}`);
 });
 
 export default app;

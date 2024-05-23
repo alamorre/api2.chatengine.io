@@ -87,7 +87,6 @@ describe("WebSocket Person Tests", () => {
     };
 
     client.onclose = (event) => {
-      // expect(event.wasClean).toBe(true);
       expect(event.wasClean).toBeTruthy();
       done();
     };

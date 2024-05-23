@@ -40,14 +40,6 @@ describe("WebSocket Chat Tests", () => {
     const url = `${wsUrl}?projectID=${projectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
-    const options = {
-      headers: {
-        "project-id": projectId,
-        "chat-id": chatID,
-        "access-key": accessKey,
-      },
-    };
-
     client.onopen = () => {
       expect(axios.get).toHaveBeenCalledWith(
         `${process.env.API_URL}/chats/${chatID}/`,
@@ -105,14 +97,6 @@ describe("WebSocket Chat Tests", () => {
     const url = `${wsUrl}?projectID=${badProjectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);
 
-    const options = {
-      headers: {
-        "project-id": badProjectId,
-        "chat-id": chatID,
-        "access-key": accessKey,
-      },
-    };
-
     client.onerror = (event) => {
       expect(event.message).toBe("Unexpected server response: 401");
       expect(axios.get).toHaveBeenCalledWith(
@@ -160,13 +144,6 @@ describe("WebSocket Chat Tests", () => {
 
     const url = `${wsUrl}?privateKey=${privateKey}&chatID=${chatID}`;
     client = new WebSocket(url);
-
-    const options = {
-      headers: {
-        "private-key": privateKey,
-        "chat-id": chatID,
-      },
-    };
 
     client.onopen = () => {
       expect(axios.get).toHaveBeenCalledWith(

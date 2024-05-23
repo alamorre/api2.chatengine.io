@@ -33,7 +33,7 @@ describe("WebSocket Chat Tests", () => {
     axios.get.mockClear();
   });
 
-  test("Authenticate chat successfully without caching", (done) => {
+  test("Authenticate chat without caching", (done) => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -74,7 +74,7 @@ describe("WebSocket Chat Tests", () => {
     };
   });
 
-  test("Authenticate chat successfully with caching", (done) => {
+  test("Authenticate chat with caching", (done) => {
     const cacheKey = `chat-auth-${projectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
@@ -97,7 +97,7 @@ describe("WebSocket Chat Tests", () => {
     };
   });
 
-  test("Authenticate chat unsuccessfully without caching", (done) => {
+  test("Reject chat without caching", (done) => {
     const expectedApiResponse = { status: 401, data: {} };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -134,7 +134,7 @@ describe("WebSocket Chat Tests", () => {
     };
   });
 
-  test("Authenticate chat unsuccessfully with caching", (done) => {
+  test("Reject chat with caching", (done) => {
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     const cacheKey = `chat-auth-${badProjectId}-${chatID}-${accessKey}-`;
     redisCache.set(cacheKey, "-1", "EX", 300);

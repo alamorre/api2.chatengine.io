@@ -34,7 +34,7 @@ describe("WebSocket Person Tests", () => {
     axios.get.mockClear();
   });
 
-  test("Authenticate person successfully without caching", (done) => {
+  test("Authenticate person without caching", (done) => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -69,7 +69,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person successfully with caching", (done) => {
+  test("Authenticate person with caching", (done) => {
     const cacheKey = `auth-${projectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
@@ -87,12 +87,13 @@ describe("WebSocket Person Tests", () => {
     };
 
     client.onclose = (event) => {
+      // expect(event.wasClean).toBe(true);
       expect(event.wasClean).toBeTruthy();
       done();
     };
   });
 
-  test("Authenticate person unsuccessfully without caching", (done) => {
+  test("Reject person without caching", (done) => {
     const expectedApiResponse = { status: 401, data: {} };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -123,7 +124,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person unsuccessfully with caching", (done) => {
+  test("Reject person with caching", (done) => {
     const badProjectId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     const cacheKey = `auth-${badProjectId}-${username}-${secret}-`;
     redisCache.set(cacheKey, "-1", "EX", 300);
@@ -178,7 +179,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person successfully with session token", (done) => {
+  test("Authenticate session without caching", (done) => {
     const expectedApiResponse = { status: 200, data: { id: 1 } };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -203,7 +204,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person successfully with caching", (done) => {
+  test("Authenticate session with caching", (done) => {
     const cacheKey = `session-${sessionToken}`;
     redisCache.set(cacheKey, 1, "EX", 900);
 
@@ -226,7 +227,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person unsuccessfully with session token", (done) => {
+  test("Reject session without caching", (done) => {
     const expectedApiResponse = { status: 404, data: {} };
     axios.get.mockResolvedValueOnce(expectedApiResponse);
 
@@ -248,7 +249,7 @@ describe("WebSocket Person Tests", () => {
     };
   });
 
-  test("Authenticate person unsuccessfully with caching", (done) => {
+  test("Reject session with caching", (done) => {
     const badSessionToken = "aaaaaaaa";
     const cacheKey = `session-${badSessionToken}`;
     redisCache.set(cacheKey, "-1", "EX", 300);

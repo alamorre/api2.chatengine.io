@@ -28,11 +28,11 @@ export default async function authChat(project, chatID, accessKey, privateKey) {
 
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
     const id = response.data.id.toString();
-    await redisCache.set(cacheKey, id, "EX", 900);
+    await redisCache.set(cacheKey, id, "EX", 300);
     return { success: true, id };
   } catch (error) {
     console.log("Chat auth failed", error);
-    await redisCache.set(cacheKey, "-1", "EX", 900);
+    await redisCache.set(cacheKey, "-1", "EX", 300);
     return { success: false, error };
   }
 }

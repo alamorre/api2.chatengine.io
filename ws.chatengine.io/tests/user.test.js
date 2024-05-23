@@ -71,7 +71,7 @@ describe("WebSocket Person Tests", () => {
 
   test("Authenticate person successfully with caching", (done) => {
     const cacheKey = `auth-${projectId}-${username}-${secret}-`;
-    redisCache.set(cacheKey, 1, "EX", 300);
+    redisCache.set(cacheKey, 1, "EX", 900);
 
     const url = `${wsUrl}?projectID=${projectId}&username=${username}&secret=${secret}`;
     client = new WebSocket(url);
@@ -205,7 +205,7 @@ describe("WebSocket Person Tests", () => {
 
   test("Authenticate person successfully with caching", (done) => {
     const cacheKey = `session-${sessionToken}`;
-    redisCache.set(cacheKey, 1, "EX", 300);
+    redisCache.set(cacheKey, 1, "EX", 900);
 
     const url = `${wsUrl}?session_token=${sessionToken}`;
     client = new WebSocket(url);

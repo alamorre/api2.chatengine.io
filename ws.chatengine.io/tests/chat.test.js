@@ -76,7 +76,7 @@ describe("WebSocket Chat Tests", () => {
 
   test("Authenticate chat successfully with caching", (done) => {
     const cacheKey = `chat-auth-${projectId}-${chatID}-${accessKey}-`;
-    redisCache.set(cacheKey, 1, "EX", 300);
+    redisCache.set(cacheKey, 1, "EX", 900);
 
     const url = `${wsUrl}?projectID=${projectId}&chatID=${chatID}&accessKey=${accessKey}`;
     client = new WebSocket(url);

@@ -1,0 +1,56 @@
+[1mProject:[0m alamorre/api2.chatengine.io/terraform-aws/costs/plan.json
+
+ [4mName[0m                                            [4mMonthly Qty[0m  [4mUnit[0m         [4mMonthly Cost[0m    
+                                                                                           
+ [1maws_rds_cluster_instance.aurora_instance[0m                                                  
+ [2m└─[0m Database instance (on-demand, db.t3.medium)          730  hours              $59.86    
+                                                                                           
+ [1maws_lb.ce_alb[0m                                                                             
+ [2m├─[0m Application load balancer                            730  hours              $16.43    
+ [2m└─[0m Load balancer capacity units                      0.3424  LCU                 $2.00  * 
+                                                                                           
+ [1maws_route53_record.api_cert_validation[0m                                                    
+ [2m├─[0m Standard queries (first 1B)                         12.5  1M queries          $5.00  * 
+ [2m├─[0m Latency based routing queries (first 1B)          8.3333  1M queries          $5.00  * 
+ [2m└─[0m Geo DNS queries (first 1B)                        7.1428  1M queries          $5.00  * 
+                                                                                           
+ [1maws_cloudwatch_log_group.ce_api_log_group[0m                                                 
+ [2m├─[0m Data ingested                                         10  GB                  $5.00  * 
+ [2m├─[0m Archival Storage                                     166  GB                  $4.98  * 
+ [2m└─[0m Insights queries data scanned                      1,000  GB                  $5.00  * 
+                                                                                           
+ [1maws_cloudwatch_log_group.ce_ws_log_group[0m                                                  
+ [2m├─[0m Data ingested                                         10  GB                  $5.00  * 
+ [2m├─[0m Archival Storage                                     166  GB                  $4.98  * 
+ [2m└─[0m Insights queries data scanned                      1,000  GB                  $5.00  * 
+                                                                                           
+ [1maws_rds_cluster.aurora_cluster[0m                                                            
+ [2m├─[0m Storage                                               50  GB                  $5.00  * 
+ [2m├─[0m I/O requests                                      21.024  1M requests         $4.20  * 
+ [2m└─[0m Snapshot export                                      500  GB                  $5.00  * 
+                                                                                           
+ [1maws_elasticache_cluster.redis_cluster[0m                                                     
+ [2m└─[0m ElastiCache (on-demand, cache.t3.micro)              730  hours              $12.41    
+                                                                                           
+ [1maws_ecs_service.ce_api_service[0m                                                            
+ [2m├─[0m Per GB per hour                                      0.5  GB                  $1.62    
+ [2m└─[0m Per vCPU per hour                                   0.25  CPU                 $7.39    
+                                                                                           
+ [1maws_ecs_service.ce_ws_service[0m                                                             
+ [2m├─[0m Per GB per hour                                      0.5  GB                  $1.62    
+ [2m└─[0m Per vCPU per hour                                   0.25  CPU                 $7.39    
+                                                                                           
+[1m OVERALL TOTAL[0m                                                                  $167.88 
+
+*Usage costs were estimated using Infracost Cloud settings, see docs for other options.
+
+──────────────────────────────────
+35 cloud resources were detected:
+∙ 9 were estimated
+∙ 26 were free
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Project                                                   ┃ Baseline cost ┃ Usage cost* ┃ Total cost ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━╋━━━━━━━━━━━━┫
+┃ alamorre/api2.chatengine.io/terraform-aws/costs/plan.json ┃ $107          ┃ $61         ┃ $168       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━┛

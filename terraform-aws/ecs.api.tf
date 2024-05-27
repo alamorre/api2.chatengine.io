@@ -1,5 +1,5 @@
 resource "aws_ecs_cluster" "ce_cluster" {
-  name = "ce-api-cluster"
+  name = "ce-cluster"
 }
 
 resource "aws_ecs_task_definition" "ce_api_td" {

@@ -134,8 +134,9 @@ resource "aws_appautoscaling_policy" "ws_scale_out" {
   scalable_dimension = aws_appautoscaling_target.ecs_ws_target.scalable_dimension
   service_namespace  = aws_appautoscaling_target.ecs_ws_target.service_namespace
   step_scaling_policy_configuration {
-    adjustment_type = "ChangeInCapacity"
-    cooldown        = 60
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = 60
+    metric_aggregation_type = "Average"
     step_adjustment {
       scaling_adjustment          = 1
       metric_interval_lower_bound = 0
@@ -150,8 +151,9 @@ resource "aws_appautoscaling_policy" "ws_scale_in" {
   scalable_dimension = aws_appautoscaling_target.ecs_ws_target.scalable_dimension
   service_namespace  = aws_appautoscaling_target.ecs_ws_target.service_namespace
   step_scaling_policy_configuration {
-    adjustment_type = "ChangeInCapacity"
-    cooldown        = 60
+    adjustment_type         = "ChangeInCapacity"
+    cooldown                = 60
+    metric_aggregation_type = "Average"
     step_adjustment {
       scaling_adjustment          = -1
       metric_interval_upper_bound = 0

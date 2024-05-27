@@ -32,7 +32,7 @@ resource "kubernetes_deployment" "api_deployment" {
       }
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag_api}"
+          image = "992382606575.dkr.ecr.us-east-1.amazonaws.com/api.chatengine.io:${var.image_tag_api}"
           name  = var.api_pod_name
           env_from {
             secret_ref {

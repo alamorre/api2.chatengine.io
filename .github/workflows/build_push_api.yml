@@ -26,7 +26,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: apichatengine
+          ECR_REPOSITORY: api.chatengine.io
           IMAGE_TAG: latest
           COMMIT_SHA: ${{ env.COMMIT_SHA }}
         run: |

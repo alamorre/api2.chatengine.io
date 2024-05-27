@@ -32,7 +32,7 @@ resource "kubernetes_deployment" "ws_deployment" {
       }
       spec {
         container {
-          image = "620457613573.dkr.ecr.us-east-1.amazonaws.com/wschatengine:${var.image_tag_ws}"
+          image = "992382606575.dkr.ecr.us-east-1.amazonaws.com/ws.chatengine.io:${var.image_tag_ws}"
           name  = var.ws_pod_name
           env_from {
             secret_ref {

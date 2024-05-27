@@ -13,7 +13,7 @@ resource "aws_ecs_task_definition" "ce_api_td" {
   container_definitions = jsonencode([
     {
       name      = "apichatengine"
-      image     = "620457613573.dkr.ecr.us-east-1.amazonaws.com/apichatengine:${var.image_tag_api}"
+      image     = "992382606575.dkr.ecr.us-east-1.amazonaws.com/api.chatengine.io:${var.image_tag_api}"
       cpu       = 256
       memory    = 512
       essential = true
@@ -167,82 +167,82 @@ resource "aws_ecs_service" "ce_api_service" {
 }
 
 # Define CloudWatch Alarms for CPU and Memory utilization
-resource "aws_cloudwatch_metric_alarm" "api_cpu_high" {
-  alarm_name          = "APIHighCPUUtilization"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "75"
-  alarm_description   = "Alarm when CPU utilization exceeds 75%"
-  dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
-    ServiceName = aws_ecs_service.ce_api_service.name
-  }
-  alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
-  ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
-}
+# resource "aws_cloudwatch_metric_alarm" "api_cpu_high" {
+#   alarm_name          = "APIHighCPUUtilization"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "75"
+#   alarm_description   = "Alarm when CPU utilization exceeds 75%"
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.ce_cluster.id
+#     ServiceName = aws_ecs_service.ce_api_service.name
+#   }
+#   alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
+#   ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
+# }
 
-resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
-  alarm_name          = "APIHighMemoryUtilization"
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "MemoryUtilization"
-  namespace           = "AWS/ECS"
-  period              = "60"
-  statistic           = "Average"
-  threshold           = "75"
-  alarm_description   = "Alarm when Memory utilization exceeds 75%"
-  dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
-    ServiceName = aws_ecs_service.ce_api_service.name
-  }
-  alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
-  ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
-}
+# resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
+#   alarm_name          = "APIHighMemoryUtilization"
+#   comparison_operator = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods  = "2"
+#   metric_name         = "MemoryUtilization"
+#   namespace           = "AWS/ECS"
+#   period              = "60"
+#   statistic           = "Average"
+#   threshold           = "75"
+#   alarm_description   = "Alarm when Memory utilization exceeds 75%"
+#   dimensions = {
+#     ClusterName = aws_ecs_cluster.ce_cluster.id
+#     ServiceName = aws_ecs_service.ce_api_service.name
+#   }
+#   alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
+#   ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
+# }
 
 # Create Application Auto Scaling Target
-resource "aws_appautoscaling_target" "ecs_api_target" {
-  max_capacity       = 10
-  min_capacity       = 1
-  resource_id        = "service/${aws_ecs_cluster.ce_cluster.id}/${aws_ecs_service.ce_api_service.name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
+# resource "aws_appautoscaling_target" "ecs_api_target" {
+#   max_capacity       = 10
+#   min_capacity       = 1
+#   resource_id        = "service/${aws_ecs_cluster.ce_cluster.id}/${aws_ecs_service.ce_api_service.name}"
+#   scalable_dimension = "ecs:service:DesiredCount"
+#   service_namespace  = "ecs"
+# }
 
-# Create Application Auto Scaling Policies
-resource "aws_appautoscaling_policy" "api_scale_out" {
-  name               = "api-scale-out"
-  policy_type        = "StepScaling"
-  resource_id        = aws_appautoscaling_target.ecs_api_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_api_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_api_target.service_namespace
-  step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 60
-    metric_aggregation_type = "Average"
-    step_adjustment {
-      scaling_adjustment          = 1
-      metric_interval_lower_bound = 0
-    }
-  }
-}
+# # Create Application Auto Scaling Policies
+# resource "aws_appautoscaling_policy" "api_scale_out" {
+#   name               = "api-scale-out"
+#   policy_type        = "StepScaling"
+#   resource_id        = aws_appautoscaling_target.ecs_api_target.resource_id
+#   scalable_dimension = aws_appautoscaling_target.ecs_api_target.scalable_dimension
+#   service_namespace  = aws_appautoscaling_target.ecs_api_target.service_namespace
+#   step_scaling_policy_configuration {
+#     adjustment_type         = "ChangeInCapacity"
+#     cooldown                = 60
+#     metric_aggregation_type = "Average"
+#     step_adjustment {
+#       scaling_adjustment          = 1
+#       metric_interval_lower_bound = 0
+#     }
+#   }
+# }
 
-resource "aws_appautoscaling_policy" "api_scale_in" {
-  name               = "api-scale-in"
-  policy_type        = "StepScaling"
-  resource_id        = aws_appautoscaling_target.ecs_api_target.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs_api_target.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs_api_target.service_namespace
-  step_scaling_policy_configuration {
-    adjustment_type         = "ChangeInCapacity"
-    cooldown                = 60
-    metric_aggregation_type = "Average"
-    step_adjustment {
-      scaling_adjustment          = -1
-      metric_interval_upper_bound = 0
-    }
-  }
-}
+# resource "aws_appautoscaling_policy" "api_scale_in" {
+#   name               = "api-scale-in"
+#   policy_type        = "StepScaling"
+#   resource_id        = aws_appautoscaling_target.ecs_api_target.resource_id
+#   scalable_dimension = aws_appautoscaling_target.ecs_api_target.scalable_dimension
+#   service_namespace  = aws_appautoscaling_target.ecs_api_target.service_namespace
+#   step_scaling_policy_configuration {
+#     adjustment_type         = "ChangeInCapacity"
+#     cooldown                = 60
+#     metric_aggregation_type = "Average"
+#     step_adjustment {
+#       scaling_adjustment          = -1
+#       metric_interval_upper_bound = 0
+#     }
+#   }
+# }

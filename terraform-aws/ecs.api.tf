@@ -6,16 +6,16 @@ resource "aws_ecs_task_definition" "ce_api_td" {
   family                   = "apichatengine"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256" # Adjust based on your requirements
-  memory                   = "512" # Adjust based on your requirements
+  cpu                      = "512"  # Adjust based on your requirements
+  memory                   = "1024" # Adjust based on your requirements
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
     {
       name      = "apichatengine"
       image     = "992382606575.dkr.ecr.us-east-1.amazonaws.com/api.chatengine.io:${var.image_tag_api}"
-      cpu       = 256
-      memory    = 512
+      cpu       = 512
+      memory    = 1024
       essential = true
       portMappings = [
         {

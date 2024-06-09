@@ -19,7 +19,9 @@ class ChatPublisher:
         message = json.dumps({"action": action, "data": chat_data})
 
         for person_id in people_ids:
-            redis_client.publish(f"person:{str(person_id)}", message)
+            print(f"Publishing to person:{str(person_id)}")
+            result = redis_client.publish(f"person:{str(person_id)}", message)
+            print(f"Published to person:{str(person_id)}: {result}")
 
         redis_client.publish(f"chat:{str(chat_data['id'])}", message)
 
@@ -32,7 +34,9 @@ class ChatPublisher:
         message = json.dumps({"action": action, "data": data})
 
         for person_id in people_ids:
-            redis_client.publish(f"person:{str(person_id)}", message)
+            print(f"Publishing to person:{str(person_id)}")
+            result = redis_client.publish(f"person:{str(person_id)}", message)
+            print(f"Published to person:{str(person_id)}: {result}")
         
         redis_client.publish(f"chat:{str(chat.pk)}", message)
 

@@ -86,8 +86,10 @@ class SessionTokenAuth(APIView):
     def get(self, _, session_token):
         # TODO: add cache with redis
         session = get_object_or_404(Session, token=session_token)
-        serializer = SessionSerializer(session, many=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        token_serializer = SessionSerializer(session, many=False)
+        person_serializer = PersonSerializer(session.person, many=False)
+        data = { 'token': token_serializer.data, 'user': person_serializer.data }
+        return Response(data, status=status.HTTP_200_OK)
 
 class PeoplePrivateApi(APIView):
     throttle_classes = [UserRateThrottle]

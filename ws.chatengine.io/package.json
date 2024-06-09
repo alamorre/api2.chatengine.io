@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "start": "node --experimental-specifier-resolution=node --experimental-json-modules --experimental-modules src/main.js"
   },
   "keywords": [],
   "author": "Adam La Morre",

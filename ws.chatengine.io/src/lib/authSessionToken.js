@@ -21,7 +21,7 @@ export default async function authSessionToken(sessionToken) {
     }
 
     // Store the result in Redis with a TTL of 15 minutes (900 seconds)
-    const id = response.data.id.toString();
+    const id = response.data.user.id.toString();
     await redisCache.set(cacheKey, id, "EX", 300);
     return { success: true, id };
   } catch (error) {

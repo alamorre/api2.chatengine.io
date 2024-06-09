@@ -39,7 +39,8 @@ class GetPeoplePrivateTestCase(APITestCase):
         data = json.loads(response.content)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['token'], session_token)
+        self.assertEqual(data['token']['token'], session_token)
+        self.assertEqual(data['user']['id'], self.person.id)
     
     def test_bad_session_token_auth(self):
         # Use a bad session token 

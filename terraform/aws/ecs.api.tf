@@ -181,8 +181,8 @@ resource "aws_cloudwatch_metric_alarm" "api_cpu_high" {
     ClusterName = aws_ecs_cluster.ce_cluster.id
     ServiceName = aws_ecs_service.ce_api_service.name
   }
-  alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
-  ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
+  alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
+  ok_actions    = [aws_appautoscaling_policy.api_scale_in.arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
@@ -199,7 +199,7 @@ resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
     ClusterName = aws_ecs_cluster.ce_cluster.id
     ServiceName = aws_ecs_service.ce_api_service.name
   }
-  alarm_actions = [aws_appautoscaling_policy.ws_scale_out.arn]
+  alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
   ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
 }
 

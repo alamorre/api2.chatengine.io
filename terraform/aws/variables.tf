@@ -18,16 +18,6 @@ variable "aws_storage_bucket_name" {
   type        = string
 }
 
-variable "db_host" {
-  description = "The host of Postgres DB."
-  type        = string
-}
-
-variable "db_port" {
-  description = "The port of Postgres DB."
-  type        = string
-}
-
 variable "db_name" {
   description = "The name of Postgres DB."
   type        = string

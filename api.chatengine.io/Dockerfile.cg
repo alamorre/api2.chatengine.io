@@ -1,0 +1,34 @@
+# Stage 1: Build stage
+FROM python:3.12.2-alpine AS build
+
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+COPY . /app/
+
+RUN pip install --upgrade pip
+
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev linux-headers \
+    && pip install -r requirements.txt \
+    && apk del .build-deps
+
+# Stage 2: Final stage
+FROM cgr.dev/chainguard/python:latest
+
+ENV PYTHONUNBUFFERED=1
+ENV PORT 8080
+
+WORKDIR /app
+
+# Copy only the necessary files from the build stage
+COPY --from=build /app /app
+COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build /usr/local/bin/uwsgi /usr/local/bin/uwsgi
+
+# Set relevant paths
+ENV PATH="/usr/local/bin:$PATH"
+ENV PYTHONPATH="/usr/local/lib/python3.12/site-packages"
+
+CMD uwsgi --http :"${PORT}" --module server.wsgi
+
+EXPOSE ${PORT}

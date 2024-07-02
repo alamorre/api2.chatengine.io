@@ -22,7 +22,7 @@ resource "aws_ecs_task_definition" "ce_ws_td" {
       environment = [
         {
           name  = "API_URL"
-          value = var.api_url
+          value = "https://${var.domain_name}"
         },
         {
           name  = "PIPELINE"

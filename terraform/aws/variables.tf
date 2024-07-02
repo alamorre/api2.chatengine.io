@@ -1,8 +1,3 @@
-variable "api_url" {
-  description = "URL for api.chatengine.io"
-  type        = string
-}
-
 variable "aws_access_key_id" {
   description = "AWS Access Key ID"
   type        = string

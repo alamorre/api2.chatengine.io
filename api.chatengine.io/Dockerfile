@@ -1,32 +1,29 @@
 # Use an official Python runtime as a parent image, based on Alpine
-FROM python:3.12.2-alpine
+FROM cgr.dev/chainguard/python:latest-dev
 
-# Set environment variables to ensure Python runs in unbuffered mode
+# Switch to root user to install packages
+USER root
+
+# Install dependencies and time zone data
+RUN apk update && apk add --no-cache tzdata
+
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
-
-# Set the port environment variable
 ENV PORT 8080
+ENV TZ=UTC
 
-# Set the working directory in the container
+# Switch back to non-root user
+USER nonroot
+
+# Set the working directory and copy contents
 WORKDIR /app
-
-# Copy the current directory contents into the container at /app
 COPY . /app/
 
 # Upgrade pip
 RUN pip install --upgrade pip
-
-# Install system dependencies required for building uWSGI
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev linux-headers
-
-# Install Python dependencies
 RUN pip install -r requirements.txt
 
-# Remove build dependencies to reduce image size
-RUN apk del .build-deps
-
-# Define the command to run uWSGI
-CMD uwsgi --http :"${PORT}" --module server.wsgi
-
-# Expose the port uWSGI will run on
+# Run as a python module
+ENTRYPOINT ["python"]
+CMD ["-m", "gunicorn", "-b", "0.0.0.0:8080", "server.wsgi:application"]
 EXPOSE ${PORT}

@@ -5,9 +5,7 @@ FROM cgr.dev/chainguard/python:latest-dev
 USER root
 
 # Install dependencies and time zone data
-RUN apk update && \
-    apk add --no-cache \
-    tzdata
+RUN apk update && apk add --no-cache tzdata
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

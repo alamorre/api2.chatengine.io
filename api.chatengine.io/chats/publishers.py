@@ -1,6 +1,6 @@
 import json 
 
-from server.redis import redis_client
+from server.redis import redis_pubsub
 from chats.models import ChatPerson
 
 def get_people_ids_in_chat(chat_id):
@@ -20,10 +20,10 @@ class ChatPublisher:
 
         for person_id in people_ids:
             print(f"Publishing to person:{str(person_id)}")
-            result = redis_client.publish(f"person:{str(person_id)}", message)
+            result = redis_pubsub.publish(f"person:{str(person_id)}", message)
             print(f"Published to person:{str(person_id)}: {result}")
 
-        redis_client.publish(f"chat:{str(chat_data['id'])}", message)
+        redis_pubsub.publish(f"chat:{str(chat_data['id'])}", message)
 
     @staticmethod
     def publish_message_data(action, chat, message_data, people_ids=None):
@@ -35,9 +35,9 @@ class ChatPublisher:
 
         for person_id in people_ids:
             print(f"Publishing to person:{str(person_id)}")
-            result = redis_client.publish(f"person:{str(person_id)}", message)
+            result = redis_pubsub.publish(f"person:{str(person_id)}", message)
             print(f"Published to person:{str(person_id)}: {result}")
         
-        redis_client.publish(f"chat:{str(chat.pk)}", message)
+        redis_pubsub.publish(f"chat:{str(chat.pk)}", message)
 
 chat_publisher = ChatPublisher()

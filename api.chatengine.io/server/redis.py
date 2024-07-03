@@ -1,9 +1,16 @@
 import redis
 from server import settings
 
-# Create a Redis connection
-redis_client = redis.Redis(
+# Create a Redis pubsub connection
+redis_pubsub = redis.Redis(
     host=settings.REDIS_HOST, 
     port=settings.REDIS_PORT, 
-    db=settings.REDIS_DB
+    db=1
+)
+
+# Create a Redis cache connection
+redis_cache = redis.Redis(
+    host=settings.REDIS_HOST, 
+    port=settings.REDIS_PORT, 
+    db=0
 )

@@ -40,7 +40,6 @@ class BasicUser(HttpUser):
                 "usernames": [self.user_name],  # Add this user to the chat
             }
             with self.client.post(url, json=data, headers=headers, catch_response=True) as response:
-                print('Create chat', response.status_code)
                 if response.status_code == 201:
                     self.chat_id = response.json().get("id")
                     print(f"Chat created successfully for {self.user_name} with Chat ID {self.chat_id}.")
@@ -58,7 +57,6 @@ class BasicUser(HttpUser):
                 "User-Secret": self.user_name
             }
             with self.client.get(url, headers=headers, catch_response=True) as response:
-                print('Fetch chat', response.status_code)
                 if response.status_code == 200:
                     print(f"Fetched chat data for {self.user_name} with Chat ID {self.chat_id}.")
                 else:

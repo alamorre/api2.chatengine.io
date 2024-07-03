@@ -172,6 +172,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1', 
     'http://localhost', 
+    'https://chatengine.io', 
     'https://api.chatengine.io', 
     'https://api2.chatengine.io'
 ]

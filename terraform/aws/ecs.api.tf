@@ -148,7 +148,7 @@ resource "aws_ecs_service" "ce_api_service" {
   name            = "apichatengine-service"
   cluster         = aws_ecs_cluster.ce_cluster.id
   task_definition = aws_ecs_task_definition.ce_api_td.arn
-  desired_count   = 1
+  desired_count   = 2
   launch_type     = "FARGATE"
 
   network_configuration {

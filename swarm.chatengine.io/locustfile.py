@@ -65,7 +65,7 @@ class BasicUser(HttpUser):
                 "Private-Key": self.chat_engine_private_key
             }
             with self.client.delete(url, headers=headers, catch_response=True) as response:
-                if response.status_code == 204:
+                if response.status_code == 200:
                     print(f"User {self.user_name} deleted successfully.")
                 else:
                     response.failure(f"Failed to delete user {self.user_name}: {response.status_code}, {response.text}")

@@ -21,20 +21,50 @@ class BasicUser(HttpUser):
         self.delete_chat_engine_user()
 
     @task
-    def fetch_user_data(self):
+    def handle_chat(self):
+        if not hasattr(self, 'chat_id'):
+            self.create_chat()
+        else:
+            self.fetch_chat()
+
+    def create_chat(self):
         if hasattr(self, 'user_id'):
-            url = f"{self.host}/users/{self.user_id}/"
+            url = f"{self.host}/chats/"
             headers = {
                 "Project-ID": self.chat_engine_project_id,
-                "Private-Key": self.chat_engine_private_key
+                "User-Name": self.user_name,
+                "User-Secret": self.user_name
+            }
+            data = {
+                "title": f"Chat for {self.user_name}",
+                "usernames": [self.user_name],  # Add this user to the chat
+            }
+            with self.client.post(url, json=data, headers=headers, catch_response=True) as response:
+                print('Create chat', response.status_code)
+                if response.status_code == 201:
+                    self.chat_id = response.json().get("id")
+                    print(f"Chat created successfully for {self.user_name} with Chat ID {self.chat_id}.")
+                else:
+                    response.failure(f"Failed to create chat for {self.user_name}: {response.status_code}, {response.text}")
+        else:
+            print(f"No user ID found for {self.user_name}. Chat creation skipped.")
+
+    def fetch_chat(self):
+        if hasattr(self, 'chat_id'):
+            url = f"{self.host}/chats/{self.chat_id}/"
+            headers = {
+                "Project-ID": self.chat_engine_project_id,
+                "User-Name": self.user_name,
+                "User-Secret": self.user_name
             }
             with self.client.get(url, headers=headers, catch_response=True) as response:
+                print('Fetch chat', response.status_code)
                 if response.status_code == 200:
-                    print(f"Fetched data for {self.user_name}")
+                    print(f"Fetched chat data for {self.user_name} with Chat ID {self.chat_id}.")
                 else:
-                    response.failure(f"Failed to fetch data for {self.user_name}: {response.status_code}, {response.text}")
+                    response.failure(f"Failed to fetch chat data for {self.user_name}: {response.status_code}, {response.text}")
         else:
-            print(f"No user ID found for {self.user_name}. Fetch skipped.")
+            print(f"No chat ID found for {self.user_name}. Fetch skipped.")
 
     def create_chat_engine_user(self):
         url = f"{self.host}/users/"
@@ -71,7 +101,3 @@ class BasicUser(HttpUser):
                     response.failure(f"Failed to delete user {self.user_name}: {response.status_code}, {response.text}")
         else:
             print(f"No user ID found for {self.user_name}. Deletion skipped.")
-
-if __name__ == "__main__":
-    import os
-    os.system("locust -f locustfile.py")

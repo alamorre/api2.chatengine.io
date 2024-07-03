@@ -169,7 +169,12 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'chat-id',
     'access-key',
 ]
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1', 
+    'http://localhost', 
+    'https://api.chatengine.io', 
+    'https://api2.chatengine.io'
+]
 
 # Stripe for payments
 import stripe

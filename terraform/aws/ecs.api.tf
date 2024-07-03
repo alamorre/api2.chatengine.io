@@ -178,7 +178,7 @@ resource "aws_cloudwatch_metric_alarm" "api_cpu_high" {
   threshold           = "75"
   alarm_description   = "Alarm when CPU utilization exceeds 75%"
   dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
+    ClusterName = aws_ecs_cluster.ce_cluster.name
     ServiceName = aws_ecs_service.ce_api_service.name
   }
   alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
@@ -196,12 +196,13 @@ resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
   threshold           = "75"
   alarm_description   = "Alarm when Memory utilization exceeds 75%"
   dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
+    ClusterName = aws_ecs_cluster.ce_cluster.name
     ServiceName = aws_ecs_service.ce_api_service.name
   }
   alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
-  ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
+  ok_actions    = [aws_appautoscaling_policy.api_scale_in.arn]
 }
+
 
 # Create Application Auto Scaling Target
 resource "aws_appautoscaling_target" "ecs_api_target" {

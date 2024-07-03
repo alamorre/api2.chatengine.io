@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "ce_api_td" {
       environment = [
         {
           name  = "API_URL"
-          value = var.api_url
+          value = "https://${var.domain_name}"
         },
         {
           name  = "AWS_ACCESS_KEY_ID"

@@ -169,6 +169,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'chat-id',
     'access-key',
 ]
+CSRF_TRUSTED_ORIGINS = ['*']
 
 # Stripe for payments
 import stripe

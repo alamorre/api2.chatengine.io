@@ -148,7 +148,7 @@ resource "aws_ecs_service" "ce_api_service" {
   name            = "apichatengine-service"
   cluster         = aws_ecs_cluster.ce_cluster.id
   task_definition = aws_ecs_task_definition.ce_api_td.arn
-  desired_count   = 1
+  desired_count   = 2
   launch_type     = "FARGATE"
 
   network_configuration {
@@ -178,7 +178,7 @@ resource "aws_cloudwatch_metric_alarm" "api_cpu_high" {
   threshold           = "75"
   alarm_description   = "Alarm when CPU utilization exceeds 75%"
   dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
+    ClusterName = aws_ecs_cluster.ce_cluster.name
     ServiceName = aws_ecs_service.ce_api_service.name
   }
   alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
@@ -196,17 +196,18 @@ resource "aws_cloudwatch_metric_alarm" "api_memory_high" {
   threshold           = "75"
   alarm_description   = "Alarm when Memory utilization exceeds 75%"
   dimensions = {
-    ClusterName = aws_ecs_cluster.ce_cluster.id
+    ClusterName = aws_ecs_cluster.ce_cluster.name
     ServiceName = aws_ecs_service.ce_api_service.name
   }
   alarm_actions = [aws_appautoscaling_policy.api_scale_out.arn]
-  ok_actions    = [aws_appautoscaling_policy.ws_scale_in.arn]
+  ok_actions    = [aws_appautoscaling_policy.api_scale_in.arn]
 }
+
 
 # Create Application Auto Scaling Target
 resource "aws_appautoscaling_target" "ecs_api_target" {
   max_capacity       = 10
-  min_capacity       = 1
+  min_capacity       = 2
   resource_id        = "service/${aws_ecs_cluster.ce_cluster.id}/${aws_ecs_service.ce_api_service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace  = "ecs"

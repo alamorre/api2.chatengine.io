@@ -38,5 +38,5 @@ ENV PATH="/app/venv/bin:$PATH"
 
 # Run as a python module
 ENTRYPOINT ["python"]
-CMD ["-m", "gunicorn", "-b", "0.0.0.0:8080", "server.wsgi:application"]
+CMD ["-m", "gunicorn", "-b", "0.0.0.0:8080", "--workers", "3", "server.wsgi:application"]
 EXPOSE ${PORT}

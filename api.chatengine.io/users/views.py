@@ -74,7 +74,7 @@ class SearchOtherUsers(APIView):
         page_size = self.get_param(request=request, param='page_size', default=250)
         start = page * page_size
         end = (page * page_size) + page_size
-        people = Person.objects.filter(project=request.auth.pk).exclude(username=request.user.username)[start:end]
+        people = Person.objects.filter(project_id=request.auth.pk).exclude(username=request.user.username)[start:end]
         serializer = PersonSerializer(people, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -107,23 +107,22 @@ class PeoplePrivateApi(APIView):
         page_size = self.get_param(request=request, param='page_size', default=250)
         start = page * page_size
         end = (page * page_size) + page_size
-        people = Person.objects.filter(project=request.auth.pk)[start:end]
+        people = Person.objects.filter(project_id=request.auth.pk)[start:end]
         serializer = PersonSerializer(people, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        project = request.auth
-        if len(Person.objects.filter(project=project)) >= project.monthly_users:
-            emailer.email_user_limit(project=project)
+        if len(Person.objects.filter(project_id=request.auth.pk)) >= request.auth.monthly_users:
+            emailer.email_user_limit(project_id=request.auth.pk)
             return Response("You're over your user limit.", status=status.HTTP_400_BAD_REQUEST)
         
         serializer = PersonSerializer(data=request.data)
         if serializer.is_valid():
-            match = Person.objects.filter(project=request.auth, username=request.data.get('username', None))
+            match = Person.objects.filter(project_id=request.auth.pk, username=request.data.get('username', None))
             if match.exists():
                 return Response({'message': "This username is taken."}, status=status.HTTP_400_BAD_REQUEST)
             try:
-                serializer.save(project=request.auth)
+                serializer.save(project_id=request.auth.pk)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except IntegrityError:
                 return Response({'message': 'This user exists'}, status=status.HTTP_400_BAD_REQUEST)
@@ -132,13 +131,13 @@ class PeoplePrivateApi(APIView):
     def put(self, request):
         serializer = PersonSerializer(data=request.data)
 
-        match = Person.objects.filter(project=request.auth, username=request.data.get('username', None))
+        match = Person.objects.filter(project_id=request.auth.pk, username=request.data.get('username', None))
         if match.exists():
             serializer = PersonSerializer(match[0], many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         if serializer.is_valid():
-            serializer.save(project=request.auth)
+            serializer.save(project_id=request.auth.pk)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -148,14 +147,14 @@ class PersonPrivateApi(APIView):
     authentication_classes = (PrivateKeyAuthentication,)
 
     def get(self, request, person_id):
-        person = get_object_or_404(Person, project=request.auth, pk=person_id)
+        person = get_object_or_404(Person, project_id=request.auth.pk, pk=person_id)
         serializer = PersonSerializer(person, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, person_id):
-        person = get_object_or_404(Person, project=request.auth, pk=person_id)
+        person = get_object_or_404(Person, project_id=request.auth.pk, pk=person_id)
 
-        match = Person.objects.filter(project=request.auth, username=request.data.get('username', None))
+        match = Person.objects.filter(project_id=request.auth.pk, username=request.data.get('username', None))
         if match.exists() and match[0].pk != person.pk:
             return Response({'message': "This username is taken."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -166,7 +165,7 @@ class PersonPrivateApi(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, person_id):
-        person = get_object_or_404(Person, project=request.auth, pk=person_id)
+        person = get_object_or_404(Person, project_id=request.auth.pk, pk=person_id)
         person_json = PersonSerializer(person, many=False).data
         person.delete()
         return Response(person_json, status=status.HTTP_200_OK)

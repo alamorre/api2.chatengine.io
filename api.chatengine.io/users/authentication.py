@@ -39,9 +39,10 @@ class UserSecretAuthentication(authentication.BaseAuthentication):
 
         cache_key = f"{public_key}:{private_key}:{username}:{secret}"
         cache_result = get_cache(cache_key)
-        
+
         if cache_result:
-            print(f"Cache hit for {cache_key}: {cache_result}")
+            pass
+            # print(f"Cache hit for {cache_key}: {cache_result}")
 
         try:
             if public_key is not None:

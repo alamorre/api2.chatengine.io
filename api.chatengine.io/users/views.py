@@ -27,21 +27,23 @@ class MyDetails(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def get(self, request):
-        serializer = PersonSerializer(request.user, many=False)
+        person = get_object_or_404(Person, pk=request.user.pk)
+        serializer = PersonSerializer(person, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        serializer = PersonSerializer(request.user, data=request.data, partial=True)
+        person = get_object_or_404(Person, pk=request.user.pk)
+        serializer = PersonSerializer(person, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            for chat_person in ChatPerson.objects.filter(person=request.user):
+            for chat_person in ChatPerson.objects.filter(person=person):
                 chat_data = ChatSerializer(chat_person.chat, many=False).data
                 chat_publisher.publish_chat_data('edit_chat', chat_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request):
-        person = request.user
+        person = get_object_or_404(Person, pk=request.user.pk)
         person_json = PersonSerializer(person, many=False).data
         person.delete()
         return Response(person_json, status=status.HTTP_200_OK)
@@ -53,7 +55,7 @@ class MySession(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def get(self, request):
-        session = Session.objects.get_or_create(person=request.user)[0]
+        session = Session.objects.get_or_create(person_id=request.user.pk)[0]
         serializer = SessionSerializer(session, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

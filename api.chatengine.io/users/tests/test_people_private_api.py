@@ -169,7 +169,6 @@ class PostPersonPrivateTestCase(APITestCase):
             },
             headers={"private-key": str(self.project.private_key)}
         )
-        print(1, response)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(data['username'], USER_2)
@@ -182,8 +181,6 @@ class PostPersonPrivateTestCase(APITestCase):
             },
             headers={"private-key": str(self.project.private_key)}
         )
-        print(2, response)
-        # print(response.content)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data, "You're over your user limit.")

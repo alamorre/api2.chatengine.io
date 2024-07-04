@@ -331,7 +331,7 @@ class Messages(APIView):
             chat_publisher.publish_chat_data('edit_chat', chat_serializer.data, people_ids=people_ids)
             chat_publisher.publish_message_data('new_message', chat, serializer.data, people_ids=people_ids)
             emailer = Emailer()
-            emailer.email_chat_members(project_id=request.auth.pk, message=message, people=people)
+            emailer.email_chat_members(project=request.auth, message=message, people=people)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

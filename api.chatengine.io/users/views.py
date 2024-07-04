@@ -113,9 +113,9 @@ class PeoplePrivateApi(APIView):
 
     def post(self, request):
         if len(Person.objects.filter(project_id=request.auth.pk)) >= request.auth.monthly_users:
-            emailer.email_user_limit(project_id=request.auth.pk)
+            emailer.email_user_limit(project=request.auth)
             return Response("You're over your user limit.", status=status.HTTP_400_BAD_REQUEST)
-        
+
         serializer = PersonSerializer(data=request.data)
         if serializer.is_valid():
             match = Person.objects.filter(project_id=request.auth.pk, username=request.data.get('username', None))

@@ -49,14 +49,14 @@ class Emailer():
             return False
 
     def email_chat_members(self, project: Project, message: Message, people):
-        # Make sure emails are on
-        if not project.is_emails_enabled:
+        # No more emails for free projects
+        if not project.is_emails_enabled or self.needs_throttle(project.plan_type):
             return 'Emails disabled', []
 
         # Make sure throttle is gone
-        now = datetime.now().replace(tzinfo=pytz.UTC)
-        if self.needs_throttle(project.plan_type) and now < project.email_last_sent + timedelta(minutes=5):
-            return 'Free throttled', []
+        # now = datetime.now().replace(tzinfo=pytz.UTC)
+        # if  and now < project.email_last_sent + timedelta(minutes=5):
+        #     return 'Free throttled', []
         
         # Email every offline message receiver with an email
         sent_list = []
@@ -70,7 +70,7 @@ class Emailer():
             return 'No users qualify', sent_list
 
         # Reset throttle
-        project.email_last_sent = now
-        project.save()
+        # project.email_last_sent = now
+        # project.save()
 
         return 'Success', sent_list

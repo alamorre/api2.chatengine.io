@@ -323,7 +323,7 @@ class Messages(APIView):
 
             # Publish new data (Socket + Hooks + Emails)
             chat_publisher.publish_chat_data('edit_chat', chat_serializer.data, people_ids=people_ids)
-            chat_publisher.publish_message_data('new_message', chat, serializer.data, people_ids=people_ids)
+            chat_publisher.publish_message_data('new_message', chat_id, serializer.data, people_ids=people_ids)
             emailer = Emailer()
             emailer.email_chat_members(project=request.auth, message=message, people=people)
 
@@ -370,8 +370,7 @@ class MessageDetails(APIView):
         serializer = MessageSerializer(message, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            chat = get_object_or_404(Chat, project_id=request.auth.pk, id=chat_id)
-            chat_publisher.publish_message_data('edit_message', chat, serializer.data)
+            chat_publisher.publish_message_data('edit_message', chat_id, serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -383,7 +382,6 @@ class MessageDetails(APIView):
             message = get_object_or_404(Message, chat_id=chat_id, id=message_id, sender_id=request.user.pk)
 
         message_json = MessageSerializer(message, many=False).data
-        chat = get_object_or_404(Chat, project_id=request.auth.pk, id=chat_id)
-        chat_publisher.publish_message_data('delete_message', chat, message_json)
+        chat_publisher.publish_message_data('delete_message', chat_id, message_json)
         message.delete()  # Delete after publish!
         return Response(message_json, status=status.HTTP_200_OK)

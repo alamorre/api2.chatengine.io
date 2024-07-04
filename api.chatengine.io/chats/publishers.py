@@ -24,16 +24,16 @@ class ChatPublisher:
         redis_pubsub.publish(f"chat:{str(chat_data['id'])}", message)
 
     @staticmethod
-    def publish_message_data(action, chat, message_data, people_ids=None):
+    def publish_message_data(action, chat_id, message_data, people_ids=None):
         if people_ids is None:
-            people_ids = get_people_ids_in_chat(chat_id=chat.id)
+            people_ids = get_people_ids_in_chat(chat_id=chat_id)
         
-        data = {"id": chat.pk, "message": message_data}
+        data = {"id": chat_id, "message": message_data}
         message = json.dumps({"action": action, "data": data})
 
         for person_id in people_ids:
             redis_pubsub.publish(f"person:{str(person_id)}", message)
         
-        redis_pubsub.publish(f"chat:{str(chat.pk)}", message)
+        redis_pubsub.publish(f"chat:{str(chat_id)}", message)
 
 chat_publisher = ChatPublisher()

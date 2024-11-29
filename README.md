@@ -57,6 +57,7 @@ With this all in place, you're now ready to run terraform!
 
 ```
 cd terraform/aws
+terraform init # to install the providers
 terraform apply
 ```
 

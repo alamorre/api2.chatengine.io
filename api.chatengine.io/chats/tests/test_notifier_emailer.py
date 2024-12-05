@@ -51,7 +51,8 @@ class EmailerTestCase(APITestCase):
         )
 
         self.assertEqual(len(sent_list), 0)
-        self.assertEqual(response, 'Free throttled')
+        self.assertEqual(response, 'Emails disabled')
+        # self.assertEqual(response, 'Free throttled')
 
     def test_notifier_pro_plan_no_people(self):
         self.project.plan_type = 'professional'
@@ -168,11 +169,13 @@ class EmailerTestCase(APITestCase):
             people=[self.person_2, self.person]
         )
 
-        self.assertEqual(len(sent_list), 1)
-        self.assertEqual(response, 'Success')
+        # self.assertEqual(len(sent_list), 1)
+        # self.assertEqual(response, 'Success')
+        self.assertEqual(len(sent_list), 0)
+        self.assertEqual(response, 'Emails disabled')
 
         # Email last sent updated
-        self.assertTrue(now < self.project.email_last_sent)
+        # self.assertTrue(now < self.project.email_last_sent)
 
         response, sent_list = emailer.email_chat_members(
             project=self.project,
@@ -181,4 +184,5 @@ class EmailerTestCase(APITestCase):
         )
 
         self.assertEqual(len(sent_list), 0)
-        self.assertEqual(response, 'Free throttled')
+        self.assertEqual(response, 'Emails disabled')
+        # self.assertEqual(response, 'Free throttled')

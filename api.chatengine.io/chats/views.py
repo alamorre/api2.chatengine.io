@@ -42,7 +42,7 @@ class Chats(APIView):
         page_size = self.get_param(request=request, param='page_size', default=250)
         start = page * page_size
         end = (page * page_size) + page_size
-        chat_people = ChatPerson.objects.filter(person=request.user).order_by('-chat_updated')[start:end]
+        chat_people = ChatPerson.objects.filter(person_id=request.user.pk).order_by('-chat_updated')[start:end]
         chats = [chat_person.chat for chat_person in chat_people]
         serializer = ChatSerializer(chats, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -50,7 +50,7 @@ class Chats(APIView):
     def post(self, request):
         serializer = ChatSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(project=request.auth, admin=request.user)
+            serializer.save(project_id=request.auth.pk, admin_id=request.user.pk)
             chat_publisher.publish_chat_data('new_chat', serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -67,20 +67,20 @@ class Chats(APIView):
             usernames = sorted(usernames + [request.user.username])
 
         try:
-            people = [get_object_or_404(Person, project=request.auth.pk, username=username) for username in usernames]
+            people = [get_object_or_404(Person, project_id=request.auth.pk, username=username) for username in usernames]
         except:
             return Response({"message": "At least one username is not a user"}, status=status.HTTP_400_BAD_REQUEST)
 
         people_ids = sorted([person.id for person in people])
 
         if request.data.get('title', False):
-            chats = Chat.objects.filter(project=request.auth, members_ids=str(people_ids), title=request.data['title'])[:1]
+            chats = Chat.objects.filter(project_id=request.auth.pk, members_ids=str(people_ids), title=request.data['title'])[:1]
         else:
-            chats = Chat.objects.filter(project=request.auth, members_ids=str(people_ids))[:1]
+            chats = Chat.objects.filter(project_id=request.auth.pk, members_ids=str(people_ids))[:1]
         chat = next(iter(chats), None)
 
         if chat is None:
-            chat = Chat.objects.create(project=request.auth, members_ids=str(people_ids), admin=request.user)
+            chat = Chat.objects.create(project_id=request.auth.pk, members_ids=str(people_ids), admin_id=request.user.pk)
             for person in people:
                 ChatPerson.objects.get_or_create(chat=chat, person=person)
 
@@ -100,7 +100,7 @@ class LatestChats(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def get(self, request, count):
-        chat_people = ChatPerson.objects.filter(person=request.user).order_by('-chat_updated')[:int(count)]
+        chat_people = ChatPerson.objects.filter(person_id=request.user.pk).order_by('-chat_updated')[:int(count)]
         chats = [chat_person.chat for chat_person in chat_people]
         serializer = ChatSerializer(chats, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -109,7 +109,7 @@ class LatestChats(APIView):
         serializer = ChatActiveSinceSerializer(data=request.data)
         if serializer.is_valid():
             chat_people = ChatPerson.objects.filter(
-                person=request.user,
+                person_id=request.user.pk,
                 chat_updated__lt=serializer.data['before']
             ).order_by('-chat_updated')[:int(count)]
             chats = [chat_person.chat for chat_person in chat_people]
@@ -125,12 +125,12 @@ class ChatDetails(APIView):
     authentication_classes = (UserSecretAuthentication, ChatAccessKeyAuthentication,)
 
     def get(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth.pk, pk=chat_id)
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
         serializer = ChatSerializer(chat, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, chat_id):
-        chat = get_object_or_404(Chat, pk=chat_id, project=request.auth)
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
         serializer = ChatSerializer(chat, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -139,10 +139,10 @@ class ChatDetails(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, chat_id):
-        if isinstance(request.user, Chat):
+        if hasattr(request.user, 'title'): # i.e. via Chat Auth
             return Response({"message": "You don't have permission"}, status=status.HTTP_403_FORBIDDEN)
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        get_object_or_404(ChatPerson, chat=chat, person=request.user)
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
+        get_object_or_404(ChatPerson, chat=chat, person_id=request.user.pk)
         chat_json = ChatSerializer(chat, many=False).data
         chat_publisher.publish_chat_data('delete_chat', chat_json)
         chat.delete()  # Delete after publish!
@@ -155,9 +155,8 @@ class ChatTyping(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def post(self, request, chat_id):
-        chat = get_object_or_404(Chat, pk=chat_id, project=request.auth)
-        get_object_or_404(ChatPerson, chat=chat, person=request.user)
-        typing_data = {'id': chat.pk, 'person': request.user.username}
+        get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        typing_data = {'id': int(chat_id), 'person': request.user.username}
         chat_publisher.publish_chat_data('is_typing', typing_data)
         return Response(typing_data, status=status.HTTP_200_OK)
 
@@ -168,19 +167,18 @@ class ChatPersonList(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def get(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        get_object_or_404(ChatPerson, chat=chat, person=request.user)
-        chat_people = ChatPerson.objects.filter(chat=chat)
+        get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        chat_people = ChatPerson.objects.filter(chat_id=chat_id)
         serializer = ChatPersonSerializer(chat_people, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        get_object_or_404(ChatPerson, chat=chat, person=request.user)
-        person = get_object_or_404(Person, project=request.auth, username=request.data.get('username'))
+        get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        person = get_object_or_404(Person, project_id=request.auth.pk, username=request.data.get('username'))
 
-        chat_person, created = ChatPerson.objects.get_or_create(chat=chat, person=person)
+        chat_person, created = ChatPerson.objects.get_or_create(chat_id=chat_id, person=person)
 
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
         serializer = ChatSerializer(chat, many=False)
         chat_publisher.publish_chat_data('add_person', serializer.data)
 
@@ -191,35 +189,35 @@ class ChatPersonList(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def patch(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        chat_person = get_object_or_404(ChatPerson, chat=chat, person=request.user)
-        last_read = get_object_or_404(Message, chat=chat, id=request.data.get('last_read', None))
+        chat_person = get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        last_read = get_object_or_404(Message, chat_id=chat_id, id=request.data.get('last_read', None))
 
         serializer = ChatPersonSerializer(chat_person, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             if last_read is not chat_person.last_read:
+                chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
                 chat_serializer = ChatSerializer(chat, many=False)
                 chat_publisher.publish_chat_data('edit_chat', chat_serializer.data)
             return Response(chat_serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id, admin=request.user)
-        person = get_object_or_404(Person, project=request.auth, username=request.data.get('username'))
-        chat_person = get_object_or_404(ChatPerson, chat=chat, person=person)
+        person = get_object_or_404(Person, project_id=request.auth.pk, username=request.data.get('username'))
+        chat_person = get_object_or_404(ChatPerson, chat_id=chat_id, person_id=person.pk)
         chat_person_json = ChatPersonSerializer(chat_person, many=False).data
         chat_person.delete()  # Delete before Socket publish!
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id, admin_id=request.user.pk)
         serializer = ChatSerializer(chat, many=False)
         chat_publisher.publish_chat_data('remove_person', serializer.data)
         chat_publisher.publish_chat_data('delete_chat', serializer.data, [person.pk])
         return Response(chat_person_json, status=status.HTTP_200_OK)
 
     def delete(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        chat_person = get_object_or_404(ChatPerson, chat=chat, person=request.user)
+        chat_person = get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
         chat_person_json = ChatPersonSerializer(chat_person, many=False).data
         chat_person.delete()  # Delete before Socket publish!
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, pk=chat_id)
         serializer = ChatSerializer(chat, many=False)
         chat_publisher.publish_chat_data('remove_person', serializer.data)
         chat_publisher.publish_chat_data('delete_chat', serializer.data, [request.user.pk])
@@ -232,31 +230,29 @@ class OtherChatPersonList(APIView):
     authentication_classes = (UserSecretAuthentication,)
 
     def get(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        get_object_or_404(ChatPerson, person=request.user, chat=chat)
-        chat_people = ChatPerson.objects.filter(chat=chat)
+        get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        chat_people = ChatPerson.objects.filter(chat_id=chat_id)
         chat_people_names = [chat_person.person.username for chat_person in chat_people]
-        people = Person.objects.filter(project=request.auth).exclude(username__in=chat_people_names)
+        people = Person.objects.filter(project_id=request.auth.pk).exclude(username__in=chat_people_names)
         serializer = PersonPublicSerializer(people, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, chat_id):
-        chat = get_object_or_404(Chat, project=request.auth, pk=chat_id)
-        get_object_or_404(ChatPerson, person=request.user, chat=chat)
-        chat_people = ChatPerson.objects.filter(chat=chat)
+        get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        chat_people = ChatPerson.objects.filter(chat_id=chat_id)
         chat_people_names = [chat_person.person.username for chat_person in chat_people]
         serializer = PersonSearchSerializer(data=request.data)
         if serializer.is_valid():
             username_people = Person.objects.filter(
-                project=request.auth,
+                project_id=request.auth.pk,
                 username__contains=serializer.data['search']
             ).exclude(username__in=chat_people_names)[0:3]
             first_name_people = Person.objects.filter(
-                project=request.auth,
+                project_id=request.auth.pk,
                 first_name__contains=serializer.data['search']
             ).exclude(username__in=chat_people_names)[0:3]
             last_name_people = Person.objects.filter(
-                project=request.auth,
+                project_id=request.auth.pk,
                 last_name__contains=serializer.data['search']
             ).exclude(username__in=chat_people_names)[0:3]
             people = list(set(username_people) | set(first_name_people) | set(last_name_people))
@@ -272,21 +268,19 @@ class Messages(APIView):
     authentication_classes = (UserSecretAuthentication, ChatAccessKeyAuthentication,)
 
     def get(self, request, chat_id):
-        if isinstance(request.user, Person):
-            get_object_or_404(ChatPerson, chat=chat_id, person=request.user)
-        else:
-            chat_id = request.user.id
-        messages = Message.objects.filter(chat=chat_id)
+        if hasattr(request.user, 'username'): # i.e. via User/Secret Auth
+            get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        messages = Message.objects.filter(chat_id=chat_id)
         messages_data = reversed(list(MessageSerializer(messages, many=True).data))
         return Response(messages_data, status=status.HTTP_200_OK)
 
     def post(self, request, chat_id):
         # Get Sender and Chat
         user = None
-        if isinstance(request.user, Person):
-            user = request.user
-            get_object_or_404(ChatPerson, chat=chat_id, person=user)
-        chat = get_object_or_404(Chat, project=request.auth.pk, id=chat_id)
+        if hasattr(request.user, 'username'): # i.e. via User/Secret Auth
+            get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+            user = get_object_or_404(Person, project_id=request.auth.pk, id=request.user.pk)
+        chat = get_object_or_404(Chat, project_id=request.auth.pk, id=chat_id)
 
         # Filter for no attachments or text
         if len(request.FILES.getlist('attachments')) == 0 and request.data.get('text', None) is None:
@@ -329,7 +323,7 @@ class Messages(APIView):
 
             # Publish new data (Socket + Hooks + Emails)
             chat_publisher.publish_chat_data('edit_chat', chat_serializer.data, people_ids=people_ids)
-            chat_publisher.publish_message_data('new_message', chat, serializer.data, people_ids=people_ids)
+            chat_publisher.publish_message_data('new_message', chat_id, serializer.data, people_ids=people_ids)
             emailer = Emailer()
             emailer.email_chat_members(project=request.auth, message=message, people=people)
 
@@ -344,11 +338,9 @@ class LatestMessages(APIView):
     authentication_classes = (UserSecretAuthentication, ChatAccessKeyAuthentication,)
 
     def get(self, request, chat_id, count):
-        if isinstance(request.user, Person):
-            get_object_or_404(ChatPerson, chat=chat_id, person=request.user)
-        else:
-            chat_id = request.user.id
-        messages = Message.objects.filter(chat=chat_id)[:int(count)]
+        if hasattr(request.user, 'username'): # i.e. via User/Secret Auth
+            get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+        messages = Message.objects.filter(chat_id=chat_id)[:int(count)]
         messages_data = reversed(list(MessageSerializer(messages, many=True).data))
         return Response(messages_data, status=status.HTTP_200_OK)
     # TODO: You can make another PUT request where you get messages LT the last PK
@@ -360,38 +352,36 @@ class MessageDetails(APIView):
     authentication_classes = (UserSecretAuthentication, ChatAccessKeyAuthentication,)
 
     def get(self, request, chat_id, message_id):
-        if isinstance(request.user, Chat):
-            message = get_object_or_404(Message, chat=request.user, id=message_id)
+        if hasattr(request.user, 'title'): # i.e. via Chat Auth
+            message = get_object_or_404(Message, chat_id=request.user.pk, id=message_id)
         else:
-            get_object_or_404(ChatPerson, chat=chat_id, person=request.user)
-            chat = get_object_or_404(Chat, project=request.auth.pk, id=chat_id)
-            message = get_object_or_404(Message, chat=chat, id=message_id)
+            get_object_or_404(ChatPerson, chat_id=chat_id, person_id=request.user.pk)
+            message = get_object_or_404(Message, chat_id=chat_id, id=message_id)
         serializer = MessageSerializer(message, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, chat_id, message_id):
-        chat = get_object_or_404(Chat, project=request.auth.pk, id=chat_id)
-        if isinstance(request.user, Chat):
-            message = get_object_or_404(Message, chat=request.user, id=message_id)
+        if hasattr(request.user, 'title'): # i.e. via Chat Auth
+            message = get_object_or_404(Message, chat_id=request.user.pk, id=message_id)
         else:
-            get_object_or_404(ChatPerson, chat=chat_id, person=request.user)
-            message = get_object_or_404(Message, chat=chat, id=message_id, sender=request.user)
+            get_object_or_404(ChatPerson, chat=chat_id, person_id=request.user.pk)
+            message = get_object_or_404(Message, chat_id=chat_id, id=message_id, sender_id=request.user.pk)
 
         serializer = MessageSerializer(message, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            chat_publisher.publish_message_data('edit_message', chat, serializer.data)
+            chat_publisher.publish_message_data('edit_message', chat_id, serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, chat_id, message_id):
-        chat = get_object_or_404(Chat, project=request.auth.pk, id=chat_id)
-        if isinstance(request.user, Chat):
-            message = get_object_or_404(Message, chat=chat, id=message_id, sender=None)
+        
+        if hasattr(request.user, 'title'): # i.e. via Chat Auth
+            message = get_object_or_404(Message, chat_id=chat_id, id=message_id, sender=None)
         else:
-            message = get_object_or_404(Message, chat=chat, id=message_id, sender=request.user)
+            message = get_object_or_404(Message, chat_id=chat_id, id=message_id, sender_id=request.user.pk)
 
         message_json = MessageSerializer(message, many=False).data
-        chat_publisher.publish_message_data('delete_message', chat, message_json)
+        chat_publisher.publish_message_data('delete_message', chat_id, message_json)
         message.delete()  # Delete after publish!
         return Response(message_json, status=status.HTTP_200_OK)
